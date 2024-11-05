@@ -42,7 +42,7 @@
 		tempCtx.textAlign = 'center';
 		tempCtx.textBaseline = 'middle';
 		const fontSize = Math.min(w * 0.15, 150); // Responsive font size with max
-		tempCtx.font = `700 ${fontSize}px Helvetica`;
+		tempCtx.font = `800 ${fontSize}px "Open Sans"`;
 		tempCtx.fillText(text, w / 2, h / 2);
 
 		// Get pixel data

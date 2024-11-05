@@ -8,7 +8,11 @@ export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 
 	theme: {
-		extend: {}
+		extend: {
+			fontFamily: {
+				'open-sans': ['"Open Sans"', 'sans-serif'],
+			},
+		},
 	},
 
 	plugins: [typography, forms, containerQueries, aspectRatio]
