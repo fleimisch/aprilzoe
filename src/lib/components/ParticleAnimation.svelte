@@ -127,9 +127,33 @@
 		man = true;
 	}
 
+	async function loadFont() {
+		try {
+			const font = new FontFace(
+				'Open Sans',
+				'url(https://fonts.gstatic.com/s/opensans/v35/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2)',
+				{ weight: '800' }
+			);
+
+			// Wait for font to load
+			await font.load();
+
+			// Add font to document
+			document.fonts.add(font);
+
+			// Now that font is loaded, initialize the canvas
+			init();
+			step();
+		} catch (err) {
+			console.error('Error loading font:', err);
+			// Fallback to init without custom font
+			init();
+			step();
+		}
+	}
+
 	onMount(() => {
-		init();
-		step();
+		loadFont();
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
