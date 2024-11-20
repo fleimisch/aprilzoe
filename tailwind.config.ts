@@ -2,6 +2,7 @@ import aspectRatio from '@tailwindcss/aspect-ratio';
 import containerQueries from '@tailwindcss/container-queries';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
+import defaultTheme from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss';
 
 export default {
@@ -9,11 +10,11 @@ export default {
 
 	theme: {
 		extend: {
-			fontFamily: {
-				'open-sans': ['"Open Sans"', 'sans-serif'],
-			},
-		},
-	},
+		  fontFamily: {
+			sans: ['"Open Sans"', ...defaultTheme.fontFamily.sans]
+		  },
+		}
+	  },
 
 	plugins: [typography, forms, containerQueries, aspectRatio]
 } satisfies Config;
