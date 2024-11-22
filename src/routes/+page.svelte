@@ -1,10 +1,12 @@
 <script lang="ts">
+	import ScrollDownIcon from '$lib/components/elements/ScrollDownIcon.svelte';
 	import ParticleAnimation from '$lib/components/ParticleAnimation.svelte';
 	let heroText = $state('APRIL ZOE');
 </script>
 
 <!-- <input type="text" bind:value={heroText} /> -->
 <div class="relative" style="padding-bottom: 100vh">
+	<ScrollDownIcon />
 	<ParticleAnimation bind:text={heroText} />
 </div>
 

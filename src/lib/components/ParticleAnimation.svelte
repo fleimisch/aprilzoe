@@ -6,7 +6,7 @@
 	const ROWS = 300;
 	let COLS: number;
 	const SPACING = 5;
-	let THICKNESS = Math.pow(80, 2.3);
+	let THICKNESS = Math.pow(80, 2.6);
 	const MARGIN = 100;
 	const COLOR = 100;
 	const DRAG = 0.95;
@@ -27,9 +27,25 @@
 		y: 0
 	};
 
+	let outlineCanvas: any;
+	let outlineCtx: any;
+	let strokeOffset = 0;
+
+	let canvasWidth: number;
+	let canvasHeight: number;
+
+	let outlineList: any[] = [];
+	const OUTLINE_SPACING = 2;
+
 	function handleResize() {
 		w = canvas.width = window.innerWidth;
 		h = canvas.height = window.innerHeight + 400;
+
+		// Update outline canvas dimensions too
+		if (outlineCanvas) {
+			outlineCanvas.width = w;
+			outlineCanvas.height = h;
+		}
 
 		// Calculate COLS based on window width and spacing
 		COLS = Math.floor(w / SPACING);
@@ -43,21 +59,51 @@
 
 		// Draw text
 		if (tempCtx) {
+			// First, draw filled text for main particles
 			tempCtx.fillStyle = 'white';
 			tempCtx.textAlign = 'center';
 			tempCtx.textBaseline = 'middle';
-			const fontSize = Math.min(w * 0.15, 150); // Responsive font size with max
+			const fontSize = Math.min(w * 0.15, 150);
 			tempCtx.font = `800 ${fontSize}px "Open Sans"`;
 			tempCtx.fillText(text, w / 2, h / 2 - 200);
-			// Get pixel data
+
+			// Get pixel data for filled text
 			const imageData = tempCtx.getImageData(0, 0, w, h).data;
 
+			// Clear canvas
+			tempCtx.clearRect(0, 0, w, h);
+
+			// Now draw stroked text for outline particles
+			tempCtx.strokeStyle = 'white';
+			tempCtx.lineWidth = 1;
+			tempCtx.strokeText(text, w / 2, h / 2 - 200);
+
+			// Get pixel data for outline
+			const outlineData = tempCtx.getImageData(0, 0, w, h).data;
+
+			// Setup particles for main text
+			list = [];
+			outlineList = [];
+
+			// Create outline particles
+			for (let y = 0; y < h; y += OUTLINE_SPACING) {
+				for (let x = 0; x < w; x += OUTLINE_SPACING) {
+					const pixelIndex = (y * w + x) * 4;
+					if (outlineData[pixelIndex] > 0 && imageData[pixelIndex] === 0) {
+						const p = Object.create(particle);
+						p.x = p.ox = x;
+						p.y = p.oy = y;
+						outlineList.push(p);
+					}
+				}
+			}
+
+			// Existing particle creation code for filled text...
 			const totalWidth = COLS * SPACING;
 			const totalHeight = ROWS * SPACING;
 			const startX = (w - totalWidth) / 2;
 			const startY = (h - totalHeight) / 2;
 
-			list = [];
 			for (let i = 0; i < NUM_PARTICLES; i++) {
 				const col = i % COLS;
 				const row = Math.floor(i / COLS);
@@ -85,15 +131,10 @@
 
 	function step() {
 		if ((tog = !tog)) {
-			if (!man) {
-				const t = +new Date() * 0.001;
-				mx = w * 0.5 + Math.cos(t * 2.1) * Math.cos(t * 0.9) * w * 0.45;
-				my = h * 0.5 + Math.sin(t * 3.2) * Math.tan(Math.sin(t * 0.8)) * h * 0.45;
-			}
-
-			for (let i = 0; i < list.length; i++) {
-				const p = list[i];
-
+			// Update both main and outline particles
+			const allParticles = [...list, ...outlineList];
+			for (let i = 0; i < allParticles.length; i++) {
+				const p = allParticles[i];
 				const dx = mx - p.x;
 				const dy = my - p.y;
 				const d = dx * dx + dy * dy;
@@ -112,25 +153,69 @@
 			const a = ctx.createImageData(w, h);
 			const b = a.data;
 
+			// Draw main particles
 			for (let i = 0; i < list.length; i++) {
 				const p = list[i];
 				const n = (~~p.x + ~~p.y * w) * 4;
 
-				// Calculate fade based on y position
-				const fadeStart = h - 400; // Start fading 400px from bottom
-				const fadeEnd = h - 100; // Complete fade 100px from bottom
+				const fadeStart = h - 400;
+				const fadeEnd = h - 100;
 				let alpha = 255;
 
 				if (p.y > fadeStart) {
 					alpha = 255 * (1 - (p.y - fadeStart) / (fadeEnd - fadeStart));
-					alpha = Math.max(0, Math.min(255, alpha)); // Clamp between 0-255
+					alpha = Math.max(0, Math.min(255, alpha));
 				}
 
 				b[n] = b[n + 1] = b[n + 2] = COLOR;
 				b[n + 3] = alpha;
 			}
 
+			// Draw outline particles
+			for (let i = 0; i < outlineList.length; i++) {
+				const p = outlineList[i];
+				const time = Date.now() * 0.001;
+
+				// Calculate letter width approximation
+				const letterWidth = Math.min(w * 0.15, 150) * 0.8; // 80% of font size
+				const letterSpacing = letterWidth * 1.2; // Add some space between letters
+
+				// Find the nearest letter center
+				const textStart = w / 2 - (text.length * letterSpacing) / 2;
+				let nearestCenter = { x: w / 2, y: h / 2 - 200 };
+				let minDist = Infinity;
+
+				for (let j = 0; j < text.length; j++) {
+					const letterX = textStart + j * letterSpacing;
+					const letterY = h / 2 - 200;
+					const dist = Math.pow(p.x - letterX, 2) + Math.pow(p.y - letterY, 2);
+					if (dist < minDist) {
+						minDist = dist;
+						nearestCenter = { x: letterX, y: letterY };
+					}
+				}
+
+				// Calculate angle based on nearest letter center
+				const angle = Math.atan2(p.y - nearestCenter.y, p.x - nearestCenter.x);
+
+				// Create circular wave motion
+				const wave = Math.sin(time * 2 + angle * 4) * 1;
+				const offsetX = p.x + Math.cos(angle) * wave;
+				const offsetY = p.y + Math.sin(angle) * wave;
+
+				const n = (~~offsetX + ~~offsetY * w) * 4;
+
+				// Animate color using the same angle for smooth flow
+				const colorWave = (Math.sin(time * 3 + angle * 4) + 1) * 0.5;
+				b[n] = 255;
+				b[n + 1] = Math.floor(192 + (255 - 192) * colorWave);
+				b[n + 2] = Math.floor(203 + (255 - 103) * colorWave);
+				b[n + 3] = 255;
+			}
+
 			ctx.putImageData(a, 0, 0);
+
+			strokeOffset -= 1;
 		}
 
 		requestAnimationFrame(step);
@@ -169,7 +254,12 @@
 	}
 
 	onMount(() => {
-		loadFont();
+		canvasWidth = window.innerWidth;
+		canvasHeight = window.innerHeight + 400;
+
+		loadFont().then(() => {
+			outlineCtx = outlineCanvas.getContext('2d');
+		});
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
@@ -184,7 +274,7 @@
 <div id="container" bind:this={container} on:mousemove={handleMouseMove} role="presentation">
 	<canvas bind:this={canvas}></canvas>
 	<div class="slider-container">
-		<input type="range" min="2000" max="200000" bind:value={THICKNESS} orient="vertical" />
+		<input type="range" min="2000" max="200000" bind:value={THICKNESS} class="vertical-slider" />
 	</div>
 </div>
 
@@ -212,17 +302,10 @@
 		align-items: center;
 	}
 
-	input[type='range'] {
-		appearance: slider-vertical;
-		height: 100%;
-		cursor: pointer;
-		background: transparent;
-	}
-	/* Webkit (Chrome, Safari, Edge) styles */
-	input[type='range'][orient='vertical'] {
-		width: 2px;
+	input[type='range'].vertical-slider {
 		writing-mode: bt-lr;
 		-webkit-appearance: slider-vertical;
+		width: 2px;
 	}
 
 	input[type='range']::-webkit-slider-runnable-track {
@@ -244,7 +327,7 @@
 
 	/* Firefox styles */
 	@-moz-document url-prefix() {
-		input[type='range'][orient='vertical'] {
+		input[type='range'].vertical-slider {
 			writing-mode: bt-lr;
 			width: 8px;
 			height: 100%;
