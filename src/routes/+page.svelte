@@ -13,7 +13,7 @@
 <div class="glow"></div>
 <div class="glow second"></div>
 
-<div class="container mx-auto px-2 md:px-20">
+<div class="container mx-auto px-6 md:px-20">
 	<div class="flex flex-col gap-10">
 		<h1
 			class="w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
@@ -22,12 +22,12 @@
 		</h1>
 
 		<div class=" flex flex-col gap-4 md:w-2/3">
-			<p class="text-2xl leading-normal text-white/75">
+			<p class="text-lg leading-normal text-white/75 md:text-2xl">
 				April Zoe, a passionate crypto enthusiast, is committed to advancing decentralization and
 				privacy to transform online identity, reputation, and trust.
 			</p>
 
-			<p class="text-2xl leading-normal text-white/75">
+			<p class="text-lg leading-normal text-white/75 md:text-2xl">
 				As a content creator, moderator, and community manager, she leverages her socials to raise
 				awareness and promote solutions centered on decentralized identity, Web3 gaming, and
 				communities. Her efforts focus on enhancing transparency, reputation management, and user

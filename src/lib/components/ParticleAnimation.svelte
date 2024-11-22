@@ -6,7 +6,7 @@
 	const ROWS = 300;
 	let COLS: number;
 	const SPACING = 5;
-	let THICKNESS = Math.pow(80, 2.6);
+	let THICKNESS = $state(Math.pow(80, 2.6));
 	const MARGIN = 100;
 	const COLOR = 100;
 	const DRAG = 0.95;
@@ -36,6 +36,8 @@
 
 	let outlineList: any[] = [];
 	const OUTLINE_SPACING = 2;
+
+	let handlePosition = $derived(((THICKNESS - 2000) / (200000 - 2000)) * 100);
 
 	function handleResize() {
 		w = canvas.width = window.innerWidth;
@@ -276,12 +278,42 @@
 	$effect(() => {
 		handleResize();
 	});
+
+	// Add these functions to handle dragging
+	function startDrag(e: MouseEvent) {
+		const track = e.currentTarget.parentElement;
+		if (!track) return;
+
+		const handleDrag = (e: MouseEvent) => {
+			const rect = track.getBoundingClientRect();
+			const percentage = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+			THICKNESS = 2000 + percentage * (200000 - 2000);
+			e.preventDefault();
+		};
+
+		const stopDrag = () => {
+			window.removeEventListener('mousemove', handleDrag);
+			window.removeEventListener('mouseup', stopDrag);
+		};
+
+		// Initial drag position
+		const rect = track.getBoundingClientRect();
+		const percentage = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+		THICKNESS = 2000 + percentage * (200000 - 2000);
+
+		window.addEventListener('mousemove', handleDrag);
+		window.addEventListener('mouseup', stopDrag);
+
+		e.preventDefault();
+	}
 </script>
 
 <div id="container" bind:this={container} on:mousemove={handleMouseMove} role="presentation">
 	<canvas bind:this={canvas}></canvas>
 	<div class="slider-container">
-		<input type="range" min="2000" max="200000" bind:value={THICKNESS} class="vertical-slider" />
+		<div class="fader-track">
+			<div class="fader-handle" style="bottom: {handlePosition}%" on:mousedown={startDrag}></div>
+		</div>
 	</div>
 </div>
 
@@ -309,52 +341,44 @@
 		align-items: center;
 	}
 
-	input[type='range'].vertical-slider {
-		writing-mode: bt-lr;
-		-webkit-appearance: slider-vertical;
+	.fader-track {
 		width: 2px;
-	}
-
-	input[type='range']::-webkit-slider-runnable-track {
-		width: 4px;
+		height: 100%;
 		background: #2c2b2b;
 		border-radius: 4px;
+		position: relative;
 	}
 
-	input[type='range']::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		height: 20px;
-		width: 10px;
-		border-radius: 50%;
-		background: #666;
-		margin-left: -6px;
-		border: 2px solid #888;
+	.fader-handle {
+		position: absolute;
+		width: 30px;
+		height: 30px;
+		left: 50%;
+		transform: translateX(-50%);
 		cursor: pointer;
+		user-select: none;
+		-webkit-user-select: none;
 	}
 
-	/* Firefox styles */
-	@-moz-document url-prefix() {
-		input[type='range'].vertical-slider {
-			writing-mode: bt-lr;
-			width: 8px;
-			height: 100%;
-			background: #333;
-			border-radius: 4px;
-		}
+	.fader-handle::before {
+		content: '';
+		position: absolute;
+		width: 20px;
+		height: 2px;
+		background: #666;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
 
-		input[type='range']::-moz-range-track {
-			background: #333;
-			width: 8px;
-			border-radius: 4px;
-		}
-
-		input[type='range']::-moz-range-thumb {
-			height: 20px;
-			width: 20px;
-			border-radius: 50%;
-			background: #666;
-			border: 2px solid #888;
-			cursor: pointer;
-		}
+	.fader-handle::after {
+		content: '';
+		position: absolute;
+		width: 2px;
+		height: 20px;
+		background: #666;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
 	}
 </style>
