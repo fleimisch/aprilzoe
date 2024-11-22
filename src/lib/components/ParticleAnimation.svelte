@@ -199,18 +199,25 @@
 				const angle = Math.atan2(p.y - nearestCenter.y, p.x - nearestCenter.x);
 
 				// Create circular wave motion
-				const wave = Math.sin(time * 2 + angle * 4) * 1;
+				const wave = Math.sin(time * 3 + angle * 4) * 1;
 				const offsetX = p.x + Math.cos(angle) * wave;
 				const offsetY = p.y + Math.sin(angle) * wave;
 
-				const n = (~~offsetX + ~~offsetY * w) * 4;
-
-				// Animate color using the same angle for smooth flow
+				// Animate color and use it for size
 				const colorWave = (Math.sin(time * 3 + angle * 4) + 1) * 0.5;
-				b[n] = 255;
-				b[n + 1] = Math.floor(192 + (255 - 192) * colorWave);
-				b[n + 2] = Math.floor(203 + (255 - 103) * colorWave);
-				b[n + 3] = 255;
+				// Dynamic dot size - larger when whiter (colorWave closer to 1)
+				const dotSize = 1 + Math.floor(colorWave * 1.3); // Will vary between 1 and 3 pixels
+
+				// Draw the dot with dynamic size
+				for (let dx = 0; dx < dotSize; dx++) {
+					for (let dy = 0; dy < dotSize; dy++) {
+						const n = (~~(offsetX + dx) + ~~(offsetY + dy) * w) * 4;
+						b[n] = 255;
+						b[n + 1] = Math.floor(192 + (255 - 192) * colorWave);
+						b[n + 2] = Math.floor(203 + (255 - 203) * colorWave);
+						b[n + 3] = 255;
+					}
+				}
 			}
 
 			ctx.putImageData(a, 0, 0);

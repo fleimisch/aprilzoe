@@ -13,15 +13,15 @@
 <div class="glow"></div>
 <div class="glow second"></div>
 
-<div class="container mx-auto px-20">
+<div class="container mx-auto px-2 md:px-20">
 	<div class="flex flex-col gap-10">
 		<h1
-			class="w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-7xl font-extrabold uppercase text-transparent xl:w-3/4"
+			class="w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
 		>
 			Sentinel, Content creator, gamer, degen
 		</h1>
 
-		<div class=" flex w-2/3 flex-col gap-4">
+		<div class=" flex flex-col gap-4 md:w-2/3">
 			<p class="text-2xl leading-normal text-white/75">
 				April Zoe, a passionate crypto enthusiast, is committed to advancing decentralization and
 				privacy to transform online identity, reputation, and trust.
