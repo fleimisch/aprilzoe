@@ -1,39 +1,74 @@
 <script lang="ts">
 	import ScrollDownIcon from '$lib/components/elements/ScrollDownIcon.svelte';
 	import ParticleAnimation from '$lib/components/ParticleAnimation.svelte';
+	import Spaceman from '$lib/components/Spaceman.svelte';
+	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
 	let heroText = $state('APRIL ZOE');
+	let y: number = $state(0);
 </script>
 
+<svelte:window bind:scrollY={y} />
+
 <!-- <input type="text" bind:value={heroText} /> -->
-<div class="relative" style="padding-bottom: 100vh">
-	<ScrollDownIcon />
+<ScrollDownIcon />
+<div class="relative" style="padding-bottom: 200vh">
 	<ParticleAnimation bind:text={heroText} />
 </div>
 
 <div class="glow"></div>
 <div class="glow second"></div>
 
-<div class="container mx-auto px-6 md:px-20">
+<div class="content-frame container relative mx-auto mb-20 flex flex-col gap-20 px-6 md:px-20">
+	<div
+		class="spaceman-wrap absolute right-0 top-0"
+		style="top: 400px; transform: translateY({-y * 0.5}px) "
+	>
+		<!-- <img
+			src="/spaceman-2-bw.png"
+			class="spaceman-1"
+			style="transform: translateY({-y * 0.2}px) rotate(-{y * 0.03}deg)"
+		/> -->
+		<!-- particleSpace = follow Y but min 0.8 and max 10 -->
+		<Spaceman particleSpace={1.2} />
+	</div>
 	<div class="flex flex-col gap-10">
 		<h1
-			class="w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
+			class="z-10 w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
 		>
 			Sentinel, Content creator, gamer, degen
 		</h1>
 
 		<div class=" flex flex-col gap-4 md:w-2/3">
-			<p class="text-lg leading-normal text-white/75 md:text-2xl">
-				April Zoe, a passionate crypto enthusiast, is committed to advancing decentralization and
-				privacy to transform online identity, reputation, and trust.
+			<p class="z-10 text-lg leading-normal text-white/75 md:text-2xl">
+				Passionate about crypto, I focus on advancing decentralization and privacy to reshape online
+				identity, reputation, and trust.
 			</p>
 
-			<p class="text-lg leading-normal text-white/75 md:text-2xl">
-				As a content creator, moderator, and community manager, she leverages her socials to raise
-				awareness and promote solutions centered on decentralized identity, Web3 gaming, and
-				communities. Her efforts focus on enhancing transparency, reputation management, and user
-				empowerment.
+			<p class="z-10 text-lg leading-normal text-white/75 md:text-2xl">
+				Through content creation, moderation, and community management, efforts center on raising
+				awareness and promoting solutions tied to decentralized identity, Web3 gaming, and community
+				building. The goal is to enhance transparency, strengthen reputation management, and empower
+				users.
 			</p>
 		</div>
+	</div>
+
+	<div class="mt-20 flex flex-col gap-10">
+		<h1
+			class="w-full bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
+		>
+			Socials
+		</h1>
+
+		<div class=" flex flex-row gap-1 md:w-2/3">
+			<ParticleIcon icon="x.svg" size={120} />
+			<ParticleIcon icon="discord.svg" size={120} />
+		</div>
+	</div>
+
+	<div class="flex flex-col gap-2">
+		<span class="text-sm text-white/75">Copyright © 2024 April Zoe. All rights reserved.</span>
+		<span class="text-sm text-white/75">Developed by Apeinzoo & April Zoe</span>
 	</div>
 </div>
 
@@ -43,6 +78,10 @@
 </div> -->
 
 <style>
+	.content-frame {
+		margin-top: -100vh;
+	}
+
 	.glow {
 		position: absolute;
 		top: 40%;
@@ -61,5 +100,16 @@
 		height: 200px;
 		filter: blur(200px);
 		background: linear-gradient(182deg, #03030300, #0303f542);
+	}
+
+	.spaceman-1 {
+		width: 400px;
+	}
+
+	.spaceman-wrap {
+		right: calc(55% - 50px);
+	}
+	.spaceman-3 {
+		width: 150px;
 	}
 </style>

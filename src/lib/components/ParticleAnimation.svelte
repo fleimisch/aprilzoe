@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	const { text = $bindable('APRIL ZOE') } = $props();
 
-	const ROWS = 300;
+	const ROWS = 400;
 	let COLS: number;
 	const SPACING = 5;
-	let THICKNESS = $state(Math.pow(80, 2.6));
+	const baseThickness = Math.pow(80, 2.6);
+	let currentThickness = $state(baseThickness);
 	const MARGIN = 100;
 	const COLOR = 100;
 	const DRAG = 0.95;
@@ -35,9 +36,55 @@
 	let canvasHeight: number;
 
 	let outlineList: any[] = [];
-	const OUTLINE_SPACING = 2;
+	const OUTLINE_SPACING = 3;
 
-	let handlePosition = $derived(((THICKNESS - 2000) / (200000 - 2000)) * 100);
+	let handlePosition = $derived(((currentThickness - 2000) / (200000 - 2000)) * 100);
+
+	// Constants - define the exact thickness values we want
+	const INITIAL_THICKNESS = Math.pow(80, 2.6);
+	const BREATH_SPEED = 0.001;
+
+	// State
+	let isMouseOut = $state(false);
+	let breathingAnimationId: number | null = null;
+
+	// Breathing animation function
+	function startBreathing() {
+		const breathe = () => {
+			const time = Date.now() * BREATH_SPEED;
+			const breatheFactor = 1.5 + Math.sin(time) * 3.5;
+			currentThickness = INITIAL_THICKNESS * breatheFactor;
+			breathingAnimationId = requestAnimationFrame(breathe);
+		};
+		breathe();
+	}
+
+	// Stop breathing animation
+	function stopBreathing() {
+		if (breathingAnimationId !== null) {
+			cancelAnimationFrame(breathingAnimationId);
+			breathingAnimationId = null;
+		}
+	}
+
+	// Mouse handlers
+	function handleMouseLeave() {
+		isMouseOut = true;
+		mx = w / 2;
+		my = h * 0.7;
+		startBreathing();
+	}
+
+	function handleMouseEnter() {
+		isMouseOut = false;
+		stopBreathing();
+		currentThickness = INITIAL_THICKNESS; // Reset to initial value
+	}
+
+	// Cleanup on component destruction
+	onDestroy(() => {
+		stopBreathing();
+	});
 
 	function handleResize() {
 		w = canvas.width = window.innerWidth;
@@ -140,9 +187,9 @@
 				const dx = mx - p.x;
 				const dy = my - p.y;
 				const d = dx * dx + dy * dy;
-				const f = -THICKNESS / d;
+				const f = -currentThickness / d;
 
-				if (d < THICKNESS) {
+				if (d < currentThickness) {
 					const t = Math.atan2(dy, dx);
 					p.vx += f * Math.cos(t);
 					p.vy += f * Math.sin(t);
@@ -281,13 +328,13 @@
 
 	// Add these functions to handle dragging
 	function startDrag(e: MouseEvent) {
-		const track = e.currentTarget.parentElement;
+		const track = (e.currentTarget as HTMLElement)?.parentElement;
 		if (!track) return;
 
 		const handleDrag = (e: MouseEvent) => {
 			const rect = track.getBoundingClientRect();
 			const percentage = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-			THICKNESS = 2000 + percentage * (200000 - 2000);
+			currentThickness = 2000 + percentage * (200000 - 2000);
 			e.preventDefault();
 		};
 
@@ -299,7 +346,7 @@
 		// Initial drag position
 		const rect = track.getBoundingClientRect();
 		const percentage = 1 - Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-		THICKNESS = 2000 + percentage * (200000 - 2000);
+		currentThickness = 2000 + percentage * (200000 - 2000);
 
 		window.addEventListener('mousemove', handleDrag);
 		window.addEventListener('mouseup', stopDrag);
@@ -308,10 +355,17 @@
 	}
 </script>
 
-<div id="container" bind:this={container} on:mousemove={handleMouseMove} role="presentation">
+<div
+	id="container"
+	bind:this={container}
+	on:mousemove={handleMouseMove}
+	on:mouseleave={handleMouseLeave}
+	on:mouseenter={handleMouseEnter}
+	role="presentation"
+>
 	<canvas bind:this={canvas}></canvas>
 	<div class="slider-container">
-		<div class="fader-track">
+		<div class="fader-track" class:fade-out={isMouseOut}>
 			<div class="fader-handle" style="bottom: {handlePosition}%" on:mousedown={startDrag}></div>
 		</div>
 	</div>
@@ -322,7 +376,7 @@
 		left: 0;
 		top: 0;
 		width: 100vw;
-		height: 150vh;
+		height: 200vh;
 		overflow: hidden;
 		position: absolute;
 	}
@@ -347,6 +401,15 @@
 		background: #2c2b2b;
 		border-radius: 4px;
 		position: relative;
+		opacity: 1;
+		transition: opacity 0.3s ease;
+		visibility: visible;
+	}
+
+	.fade-out {
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
 	}
 
 	.fader-handle {
@@ -365,7 +428,7 @@
 		position: absolute;
 		width: 20px;
 		height: 2px;
-		background: #666;
+		background: #9b9b9b;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
@@ -376,7 +439,7 @@
 		position: absolute;
 		width: 2px;
 		height: 20px;
-		background: #666;
+		background: #9b9b9b;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
