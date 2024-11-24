@@ -53,16 +53,18 @@
 		</div>
 	</div>
 
-	<div class="mt-20 flex flex-col gap-10">
+	<div class="mt-20 flex flex-col gap-5">
 		<h1
 			class="w-full bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
 		>
 			Socials
 		</h1>
 
-		<div class=" flex flex-row gap-1 md:w-2/3">
-			<ParticleIcon icon="x.svg" size={120} />
-			<ParticleIcon icon="discord.svg" size={120} />
+		<div class=" flex flex-row" style="margin-left:-20px">
+			<ParticleIcon icon="x.svg" size={85} title="X" />
+			<ParticleIcon icon="telegram.svg" size={85} title="Telegram" />
+			<ParticleIcon icon="discord.svg" size={85} title="Discord" />
+			<ParticleIcon icon="phaver.svg" size={85} title="Phaver" />
 		</div>
 	</div>
 

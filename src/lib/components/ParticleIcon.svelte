@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ParticleText from './ParticleText.svelte';
 	export let icon: string;
 	export let size: number = 200;
+	export let title: string = '';
 
 	let w = size;
 	let h = size;
@@ -39,7 +41,10 @@
 
 	const THICKNESS = 2000; // Increased thickness for wider mouse influence
 
+	let showTitle = false;
+
 	function handleMouseMove(event: MouseEvent) {
+		showTitle = true;
 		const rect = canvas.getBoundingClientRect();
 		mx = event.clientX - rect.left;
 		my = event.clientY - rect.top;
@@ -47,6 +52,7 @@
 	}
 
 	function handleMouseLeave() {
+		showTitle = false;
 		isMouseOver = false; // Mouse has left the canvas
 	}
 
@@ -179,7 +185,8 @@
 	on:mouseleave={handleMouseLeave}
 	style="width: {size}px; height: {size}px;"
 >
-	<canvas bind:this={canvas} {width} {height}></canvas>
+	<canvas bind:this={canvas} {width} {height} class="particle-canvas"></canvas>
+	<ParticleText text={title} size={size * 0.2} className={showTitle ? 'title-overlay' : ''} />
 </div>
 
 <style>
@@ -188,7 +195,17 @@
 		overflow: hidden;
 	}
 
-	canvas {
+	.particle-canvas {
 		display: block;
+		mask-image: radial-gradient(circle at center, black 30%, transparent 70%);
+		-webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 70%);
+	}
+
+	.title-overlay {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
 	}
 </style>

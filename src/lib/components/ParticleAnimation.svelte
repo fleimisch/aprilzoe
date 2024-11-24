@@ -3,13 +3,13 @@
 
 	const { text = $bindable('APRIL ZOE') } = $props();
 
-	const ROWS = 400;
+	let ROWS = 0;
 	let COLS: number;
-	const SPACING = 5;
+	const SPACING = 6;
 	const baseThickness = Math.pow(80, 2.6);
 	let currentThickness = $state(baseThickness);
 	const MARGIN = 100;
-	const COLOR = 100;
+	const COLOR = 110;
 	const DRAG = 0.95;
 	const EASE = 0.25;
 
@@ -86,91 +86,112 @@
 		stopBreathing();
 	});
 
-	function handleResize() {
-		w = canvas.width = window.innerWidth;
-		h = canvas.height = window.innerHeight + 400;
+	// Add throttle utility at the top of the script
+	function throttle(func: Function, limit: number) {
+		let inThrottle: boolean;
+		return function (this: any, ...args: any[]) {
+			if (!inThrottle) {
+				func.apply(this, args);
+				inThrottle = true;
+				setTimeout(() => (inThrottle = false), limit);
+			}
+		};
+	}
 
-		// Update outline canvas dimensions too
-		if (outlineCanvas) {
-			outlineCanvas.width = w;
-			outlineCanvas.height = h;
-		}
+	// Replace the existing handleResize implementation
+	let tmr1: ReturnType<typeof setTimeout>;
+	const handleResize = throttle(() => {
+		clearTimeout(tmr1);
+		tmr1 = setTimeout(() => {
+			if (!canvas || !ctx) return;
 
-		// Calculate COLS based on window width and spacing
-		COLS = Math.floor(w / SPACING);
-		const NUM_PARTICLES = ROWS * COLS;
+			w = canvas.width = window.innerWidth;
+			h = canvas.height = window.innerHeight + 400;
 
-		// Setup temporary canvas for text
-		const tempCanvas = document.createElement('canvas');
-		tempCanvas.width = w;
-		tempCanvas.height = h;
-		const tempCtx = tempCanvas.getContext('2d');
+			// Update outline canvas dimensions
+			if (outlineCanvas) {
+				outlineCanvas.width = w;
+				outlineCanvas.height = h;
+			}
 
-		// Draw text
-		if (tempCtx) {
-			// First, draw filled text for main particles
-			tempCtx.fillStyle = 'white';
-			tempCtx.textAlign = 'center';
-			tempCtx.textBaseline = 'middle';
+			// Calculate COLS once
+			COLS = Math.floor(w / SPACING);
+			const NUM_PARTICLES = ROWS * COLS;
+
+			// Create temp canvas once
+			const tempCanvas = document.createElement('canvas');
+			const tempCtx = tempCanvas.getContext('2d');
+			if (!tempCtx) return;
+
+			tempCanvas.width = w;
+			tempCanvas.height = h;
+
+			// Prepare text rendering settings
 			const fontSize = Math.min(w * 0.15, 150);
 			tempCtx.font = `800 ${fontSize}px "Open Sans"`;
-			tempCtx.fillText(text, w / 2, h / 2 - 200);
+			tempCtx.textAlign = 'center';
+			tempCtx.textBaseline = 'middle';
 
-			// Get pixel data for filled text
+			// Draw text once and reuse the image data
+			tempCtx.fillStyle = 'white';
+			tempCtx.fillText(text, w / 2, h / 2 - 200);
 			const imageData = tempCtx.getImageData(0, 0, w, h).data;
 
-			// Clear canvas
+			// Clear and draw stroke for outline
 			tempCtx.clearRect(0, 0, w, h);
-
-			// Now draw stroked text for outline particles
 			tempCtx.strokeStyle = 'white';
 			tempCtx.lineWidth = 1;
 			tempCtx.strokeText(text, w / 2, h / 2 - 200);
-
-			// Get pixel data for outline
 			const outlineData = tempCtx.getImageData(0, 0, w, h).data;
 
-			// Setup particles for main text
+			// Pre-calculate layout values
+			const totalWidth = COLS * SPACING;
+			const totalHeight = ROWS * SPACING;
+			const startX = 0; //(w - totalWidth) / 2;
+			const startY = 0; //(h - totalHeight) / 2;
+
+			// Reset particle arrays with estimated capacity
 			list = [];
 			outlineList = [];
+			list.length = 0;
+			outlineList.length = 0;
 
-			// Create outline particles
+			// Create outline particles more efficiently
 			for (let y = 0; y < h; y += OUTLINE_SPACING) {
 				for (let x = 0; x < w; x += OUTLINE_SPACING) {
 					const pixelIndex = (y * w + x) * 4;
 					if (outlineData[pixelIndex] > 0 && imageData[pixelIndex] === 0) {
-						const p = Object.create(particle);
-						p.x = p.ox = x;
-						p.y = p.oy = y;
-						outlineList.push(p);
+						outlineList.push({
+							...particle,
+							x: x,
+							y: y,
+							ox: x,
+							oy: y
+						});
 					}
 				}
 			}
 
-			// Existing particle creation code for filled text...
-			const totalWidth = COLS * SPACING;
-			const totalHeight = ROWS * SPACING;
-			const startX = (w - totalWidth) / 2;
-			const startY = (h - totalHeight) / 2;
-
+			// Create main particles more efficiently
 			for (let i = 0; i < NUM_PARTICLES; i++) {
 				const col = i % COLS;
 				const row = Math.floor(i / COLS);
 				const x = startX + SPACING * col;
 				const y = startY + SPACING * row;
-
-				// Check if this position overlaps with text
 				const pixelIndex = (Math.floor(y) * w + Math.floor(x)) * 4;
+
 				if (imageData[pixelIndex] === 0) {
-					// If pixel is black (no text)
-					const p = Object.create(particle);
-					p.x = p.ox = x;
-					p.y = p.oy = y;
-					list.push(p);
+					list.push({
+						...particle,
+						x: x,
+						y: y,
+						ox: x,
+						oy: y
+					});
 				}
 			}
-		}
-	}
+		}, 100); // Debounce delay
+	}, 60); // Throttle to ~60fps
 
 	function init() {
 		ctx = canvas.getContext('2d');
@@ -312,18 +333,36 @@
 	onMount(() => {
 		canvasWidth = window.innerWidth;
 		canvasHeight = window.innerHeight + 400;
+		ROWS = Math.floor(canvasHeight / 5);
 
-		loadFont().then(() => {
+		// Initialize canvas first
+		if (canvas) {
+			ctx = canvas.getContext('2d');
 			outlineCtx = outlineCanvas.getContext('2d');
-		});
+
+			// Set initial dimensions
+			w = canvas.width = window.innerWidth;
+			h = canvas.height = window.innerHeight + 400;
+
+			if (outlineCanvas) {
+				outlineCanvas.width = w;
+				outlineCanvas.height = h;
+			}
+
+			// Set initial mouse position
+			mx = w / 2;
+			my = h / 2;
+
+			// Start the animation process
+			loadFont().then(() => {
+				init();
+				step();
+			});
+		}
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
 		};
-	});
-
-	$effect(() => {
-		handleResize();
 	});
 
 	// Add these functions to handle dragging
@@ -364,6 +403,7 @@
 	role="presentation"
 >
 	<canvas bind:this={canvas}></canvas>
+	<canvas bind:this={outlineCanvas} style="display: none;"></canvas>
 	<div class="slider-container">
 		<div class="fader-track" class:fade-out={isMouseOut}>
 			<div class="fader-handle" style="bottom: {handlePosition}%" on:mousedown={startDrag}></div>
