@@ -4,6 +4,7 @@
 	import Spaceman from '$lib/components/Spaceman.svelte';
 	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
 	import Starfield from '$lib/components/Starfield.svelte';
+
 	let heroText = $state('APRIL ZOE');
 	let y: number = $state(0);
 
@@ -94,8 +95,9 @@
 							<a
 								href="https://galactica.com/sentinels"
 								class="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text font-sans text-base font-bold text-transparent hover:from-pink-500 hover:to-violet-500"
-								target="_blank">Galactica Network Sentinels</a
-							>
+								target="_blank"
+								>Galactica Network Sentinels
+							</a>
 						</p>
 					</div>
 				</div>
