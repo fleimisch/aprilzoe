@@ -9,7 +9,7 @@
 	const baseThickness = Math.pow(80, 2.6);
 	let currentThickness = $state(baseThickness);
 	const MARGIN = 100;
-	const COLOR = 80;
+	const COLOR = 85;
 	const DRAG = 0.95;
 	const EASE = 0.25;
 

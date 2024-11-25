@@ -58,7 +58,7 @@
 					tempCtx.fillRect(0, 0, w, h);
 
 					// Center and scale the image
-					const scale = Math.min(w / img.width, h / img.height) * 0.8;
+					const scale = Math.min(w / img.width, h / img.height) * 0.65;
 					const scaledWidth = img.width * scale;
 					const scaledHeight = img.height * scale;
 					const x = (w - scaledWidth) / 2;

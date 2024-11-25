@@ -4,6 +4,7 @@
 	import Spaceman from '$lib/components/Spaceman.svelte';
 	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
 	import Starfield from '$lib/components/Starfield.svelte';
+	import SvgIcon from '$lib/components/elements/SvgIcon.svelte';
 
 	let heroText = $state('APRIL ZOE');
 	let y: number = $state(0);
@@ -27,7 +28,7 @@
 >
 	<div
 		class="spaceman-wrap absolute right-0 top-0"
-		style="top: 400px; transform: translateY({-y * 0.3}px) "
+		style="top: 200px; transform: translateY({-y * 0.3}px) "
 	>
 		<Spaceman particleSpace={1.2} />
 	</div>
@@ -54,11 +55,11 @@
 	</div>
 
 	<div class="relative mt-20 flex flex-col gap-10">
-		<h2
+		<!-- <h2
 			class="w-full font-sans text-5xl font-extrabold uppercase text-transparent text-white md:text-5xl xl:w-3/4"
 		>
 			GIGS
-		</h2>
+		</h2> -->
 
 		<div class="flex flex-col gap-10 md:flex-row">
 			<div class="flex flex-col gap-10 xl:flex-row">
@@ -74,16 +75,16 @@
 						class="text-lg leading-normal text-white md:text-2xl"
 						style="max-height: 60px; height:60px; min-height:60px;"
 					>
-						Galactica Network Advocate | Sentinel | Cypher University Faction Leader
+						Galactica Network Advocate | Sentinel | CypherUNI Faction Leader
 					</p>
 
 					<div class="flex flex-col gap-4 text-lg text-white/75">
 						<p>
 							As a Sentinel, I serve as an ambassador, educator, and early adopter of the Galactica
 							Network, actively promoting and supporting decentralized technology. Alongside this
-							role, I am a Discord moderator, investor, node operator, and Cypher University Faction
-							Leader, where I lead community management and business initiatives and drive awareness
-							of decentralized protocols.
+							role, I am a Discord moderator, investor, node operator, and CypherUNI Faction Leader,
+							where I lead community management and business initiatives and drive awareness of
+							decentralized protocols.
 						</p>
 						<p>
 							Additionally, I collaborate closely with Galactica's core team to enhance the
@@ -94,9 +95,13 @@
 						<p>
 							<a
 								href="https://galactica.com/sentinels"
-								class="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text font-sans text-base font-bold text-transparent hover:from-pink-500 hover:to-violet-500"
+								class="flex flex-row items-center gap-2"
 								target="_blank"
-								>Galactica Network Sentinels
+								><span
+									class="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text font-sans text-base font-bold text-transparent hover:from-pink-500 hover:to-violet-500"
+									>Galactica Network Sentinels</span
+								>
+								<SvgIcon icon="external-link" className="text-white/50" size={16} />
 							</a>
 						</p>
 					</div>
@@ -113,7 +118,7 @@
 							<img src="/xborg.svg" class="h-10" />
 							<img src="/swissborg.svg" class="h-7" />
 						</div>
-						<!-- <p class="text-white/05 text-sm">Since Jan 2022</p> -->
+						<p class="text-white/05 text-sm">Oct 2024 - present</p>
 					</div>
 					<p
 						class="text-lg leading-normal text-white md:text-2xl"
@@ -151,7 +156,15 @@
 			In collaboration with Apeinzoo
 		</h3>
 
-		<div class="mt-10 flex flex-col gap-10 md:flex-row"></div>
+		<div class="mt-10 flex flex-col gap-10 md:flex-row">
+			Coming soon
+			<!-- <div class="flex flex-col gap-10 xl:flex-row">
+				<img src="/development-pledge.png" class="" />
+			</div>
+			<div class="flex flex-col gap-10 xl:flex-row">
+				<img src="/development-diamonds.png" class="" />
+			</div> -->
+		</div>
 	</div>
 
 	<div class="mt-20 flex flex-col gap-5">
@@ -221,7 +234,7 @@
 	}
 
 	.spaceman-wrap {
-		right: calc(50% - 50px);
+		right: calc(55% - 50px);
 		z-index: 2;
 	}
 
