@@ -1,17 +1,15 @@
 <script lang="ts">
 	export let text: string = '';
-	export let size: number = 20;
+	export let size: number = 14;
 	export let className: string = '';
 </script>
 
-<div class={className} style="font-size: {size}px;">
-	{text}
+<div class="sans-serif flex items-center justify-center {className}">
+	<span
+		class="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-center text-5xl font-bold"
+		style="font-size: {size}px;">{text}</span
+	>
 </div>
 
 <style>
-	div {
-		color: white;
-		font-family: 'Open Sans', sans-serif;
-		font-weight: bold;
-	}
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-
+	import { device } from '$lib/stores/device';
 	const { text = $bindable('APRIL ZOE') } = $props();
 
 	let ROWS = 0;
@@ -69,10 +69,12 @@
 
 	// Mouse handlers
 	function handleMouseLeave() {
-		isMouseOut = true;
-		mx = w / 2;
-		my = h * 0.7;
-		startBreathing();
+		if ($device.isDesktop) {
+			isMouseOut = true;
+			mx = w / 2;
+			my = h * 0.7;
+			startBreathing();
+		}
 	}
 
 	function handleMouseEnter() {
@@ -158,7 +160,7 @@
 
 			// Create outline particles more efficiently
 			for (let y = 0; y < h; y += OUTLINE_SPACING) {
-				for (let x = 0; x < w; x += OUTLINE_SPACING) {
+				for (let x = 0; x < w; x += OUTLINE_SPACING - 1) {
 					const pixelIndex = (y * w + x) * 4;
 					if (outlineData[pixelIndex] > 0 && imageData[pixelIndex] === 0) {
 						outlineList.push({

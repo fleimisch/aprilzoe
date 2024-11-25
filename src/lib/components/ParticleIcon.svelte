@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ParticleText from './ParticleText.svelte';
+	import { toast } from '$lib/utilities/toast';
 	export let icon: string;
 	export let size: number = 200;
 	export let title: string = '';
+	export let link: string = '';
 
 	let w = size;
 	let h = size;
@@ -116,7 +118,7 @@
 			const centerX = w / 2;
 			const centerY = h / 2;
 			for (let i = 0; i < OUTLINE_PARTICLE_COUNT; i++) {
-				const angle = (Math.PI * 2 * i) / OUTLINE_PARTICLE_COUNT;
+				const angle = (Math.PI * 20 * i) / OUTLINE_PARTICLE_COUNT;
 				const radius = w * 0.3;
 				outlineParticles.push({
 					x: centerX + Math.cos(angle) * radius,
@@ -175,24 +177,41 @@
 		initParticles();
 		step();
 	});
+
+	function handleClick() {
+		if (link) {
+			window.open(link, '_blank');
+		} else {
+			// copy title to clipboard
+			navigator.clipboard.writeText(title);
+			// show toast
+			// make a toast
+
+			toast.success('Copied to clipboard');
+		}
+	}
 </script>
 
 <div
 	bind:this={container}
-	class="particle-icon"
+	class="particle-icon relative"
 	role="presentation"
 	on:mousemove={handleMouseMove}
 	on:mouseleave={handleMouseLeave}
 	style="width: {size}px; height: {size}px;"
 >
-	<canvas bind:this={canvas} {width} {height} class="particle-canvas"></canvas>
-	<ParticleText text={title} size={size * 0.2} className={showTitle ? 'title-overlay' : ''} />
+	{#if showTitle}
+		<ParticleText className="title-overlay absolute w-full h-full" text={title} size={12} />
+	{/if}
+	<canvas bind:this={canvas} {width} {height} class="particle-canvas" on:click={handleClick}
+	></canvas>
 </div>
 
 <style>
 	.particle-icon {
 		position: relative;
 		overflow: hidden;
+		cursor: pointer;
 	}
 
 	.particle-canvas {
