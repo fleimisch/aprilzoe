@@ -35,15 +35,12 @@
 		y: 0
 	};
 
-	let lastScrollY = 0;
-	let scrollVelocity = 0;
-	let scrollTimeout: number;
-	const SCROLL_DRAG = 0.95;
-	const SCROLL_EASE = 0.25;
-	const SPREAD_FACTOR = 0.3;
-
 	const FLOAT_AMPLITUDE = 5; // How far up/down to float
 	const FLOAT_SPEED = 0.001; // How fast to float
+
+	let isInView = true;
+	let observer: IntersectionObserver;
+	let imageData: ImageData;
 
 	function extractSVGPoints(svg: string): Promise<ImageData> {
 		return new Promise((resolve) => {
@@ -163,147 +160,147 @@
 	}
 
 	function step() {
-		if ((tog = !tog)) {
-			const time = Date.now() * FLOAT_SPEED;
-			const floatOffset = Math.sin(time) * FLOAT_AMPLITUDE;
+		if (!ctx) return;
 
-			// Mouse interaction for background particles
-			for (const p of backgroundParticles) {
-				const dx = mx - p.x;
-				const dy = my - p.y;
-				const d = dx * dx + dy * dy;
-				const f = -THICKNESS / d;
-
-				if (d < THICKNESS) {
-					const t = Math.atan2(dy, dx);
-					p.vx += f * Math.cos(t);
-					p.vy += f * Math.sin(t);
-				}
-
-				// Apply velocity with drag
-				p.x += p.vx *= DRAG;
-				p.y += p.vy *= DRAG;
-
-				// Gradually return to orbit
-				const centerX = w / 2;
-				const centerY = h / 2;
-				const targetX = centerX + Math.cos(p.angle) * p.radius;
-				const targetY = centerY + Math.sin(p.angle) * p.radius;
-
-				p.x += (targetX - p.x) * EASE;
-				p.y += (targetY - p.y) * EASE;
-
-				// Continue orbit
-				p.angle += p.speed * 0.01;
-			}
-
-			// Mouse interaction for main particles
-			for (const p of particles) {
-				const dx = mx - p.currentX;
-				const dy = my - p.currentY;
-				const d = dx * dx + dy * dy;
-				const f = -THICKNESS / d;
-
-				if (d < THICKNESS) {
-					const t = Math.atan2(dy, dx);
-					p.vx += f * Math.cos(t);
-					p.vy += f * Math.sin(t);
-				}
-
-				// Add some random movement to simulate dynamics
-				p.vx += (Math.random() - 0.5) * 0.1;
-				p.vy += (Math.random() - 0.5) * 0.1;
-
-				// Add floating motion
-				const floatingY = p.y + floatOffset;
-
-				p.currentX += (p.vx *= DRAG) + (p.x - p.currentX) * EASE;
-				p.currentY += (p.vy *= DRAG) + (floatingY - p.currentY) * EASE;
-			}
-		} else {
-			const imageData = ctx.createImageData(w, h);
-			const data = imageData.data;
+		// Only render when in view or nearby
+		if (isInView) {
 			const centerX = w / 2;
 			const centerY = h / 2;
 
-			// Draw background particles
-			for (const p of backgroundParticles) {
-				const dotSize = 1;
+			if ((tog = !tog)) {
+				const time = Date.now() * FLOAT_SPEED;
+				const floatOffset = Math.sin(time) * FLOAT_AMPLITUDE;
 
-				// Draw background particle at current position
-				for (let dx = 0; dx < dotSize; dx++) {
-					for (let dy = 0; dy < dotSize; dy++) {
-						const nx = ~~p.x + dx;
-						const ny = ~~p.y + dy;
-						if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-							const n = (nx + ny * w) * 4;
-							data[n] = p.color.r;
-							data[n + 1] = p.color.g;
-							data[n + 2] = p.color.b;
-							data[n + 3] = 255;
+				// Mouse interaction for background particles
+				for (const p of backgroundParticles) {
+					const dx = mx - p.x;
+					const dy = my - p.y;
+					const d = dx * dx + dy * dy;
+					const f = -THICKNESS / d;
+
+					if (d < THICKNESS) {
+						const t = Math.atan2(dy, dx);
+						p.vx += f * Math.cos(t);
+						p.vy += f * Math.sin(t);
+					}
+
+					p.x += p.vx *= DRAG;
+					p.y += p.vy *= DRAG;
+
+					const targetX = centerX + Math.cos(p.angle) * p.radius;
+					const targetY = centerY + Math.sin(p.angle) * p.radius;
+
+					p.x += (targetX - p.x) * EASE;
+					p.y += (targetY - p.y) * EASE;
+
+					p.angle += p.speed * 0.01;
+				}
+
+				// Mouse interaction for main particles
+				for (const p of particles) {
+					const dx = mx - p.currentX;
+					const dy = my - p.currentY;
+					const d = dx * dx + dy * dy;
+					const f = -THICKNESS / d;
+
+					if (d < THICKNESS) {
+						const t = Math.atan2(dy, dx);
+						p.vx += f * Math.cos(t);
+						p.vy += f * Math.sin(t);
+					}
+
+					// Add some random movement to simulate dynamics
+					p.vx += (Math.random() - 0.5) * 0.1;
+					p.vy += (Math.random() - 0.5) * 0.1;
+
+					// Add floating motion
+					const floatingY = p.y + floatOffset;
+
+					p.currentX += (p.vx *= DRAG) + (p.x - p.currentX) * EASE;
+					p.currentY += (p.vy *= DRAG) + (floatingY - p.currentY) * EASE;
+				}
+			} else {
+				// Reuse ImageData instance
+				if (!imageData) {
+					imageData = ctx.createImageData(w, h);
+				}
+				const data = imageData.data;
+				data.fill(0);
+
+				// Draw background particles
+				for (const p of backgroundParticles) {
+					const dotSize = 1;
+					const px = ~~p.x;
+					const py = ~~p.y;
+
+					if (px >= 0 && px < w && py >= 0 && py < h) {
+						const n = (px + py * w) * 4;
+						data[n] = p.color.r;
+						data[n + 1] = p.color.g;
+						data[n + 2] = p.color.b;
+						data[n + 3] = 255;
+					}
+				}
+
+				// Draw outline particles
+				for (const p of outlineParticles) {
+					const time = Date.now() * 0.001;
+					const angle = Math.atan2(p.y - centerY, p.x - centerX);
+					const wave = Math.sin(time * 3 + angle * 4) * 1;
+					const offsetX = p.x + Math.cos(angle) * wave;
+					const offsetY = p.y + Math.sin(angle) * wave;
+
+					const dotSize = 1;
+
+					// Draw outline particle
+					for (let dx = 0; dx < dotSize; dx++) {
+						for (let dy = 0; dy < dotSize; dy++) {
+							const nx = ~~(offsetX + dx);
+							const ny = ~~(offsetY + dy);
+							if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+								const n = (nx + ny * w) * 4;
+								data[n] = 255;
+								data[n + 1] = 255;
+								data[n + 2] = 255;
+								data[n + 3] = 255;
+							}
 						}
 					}
 				}
-			}
 
-			// Draw outline particles
-			for (const p of outlineParticles) {
-				const time = Date.now() * 0.001;
-				const angle = Math.atan2(p.y - centerY, p.x - centerX);
-				const wave = Math.sin(time * 3 + angle * 4) * 1;
-				const offsetX = p.x + Math.cos(angle) * wave;
-				const offsetY = p.y + Math.sin(angle) * wave;
+				// Draw spaceman particles
+				for (const p of particles) {
+					if (!p.seed) {
+						p.seed = Math.random() * 1000;
+						p.currentX = p.x;
+						p.currentY = p.y;
+						p.vx = 0;
+						p.vy = 0;
+						p.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+					}
 
-				const dotSize = 1;
+					const dotSize = 1;
+					const px = ~~p.currentX;
+					const py = ~~p.currentY;
 
-				// Draw outline particle
-				for (let dx = 0; dx < dotSize; dx++) {
-					for (let dy = 0; dy < dotSize; dy++) {
-						const nx = ~~(offsetX + dx);
-						const ny = ~~(offsetY + dy);
-						if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-							const n = (nx + ny * w) * 4;
-							data[n] = 255;
-							data[n + 1] = 255;
-							data[n + 2] = 255;
-							data[n + 3] = 255;
+					// Draw particle
+					for (let dx = 0; dx < dotSize; dx++) {
+						for (let dy = 0; dy < dotSize; dy++) {
+							const nx = px + dx;
+							const ny = py + dy;
+							if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+								const n = (nx + ny * w) * 4;
+								data[n] = p.color.r;
+								data[n + 1] = p.color.g;
+								data[n + 2] = p.color.b;
+								data[n + 3] = 255;
+							}
 						}
 					}
 				}
+
+				ctx.putImageData(imageData, 0, 0);
 			}
-
-			// Draw spaceman particles with enhanced dynamics
-			for (const p of particles) {
-				if (!p.seed) {
-					p.seed = Math.random() * 1000;
-					p.currentX = p.x;
-					p.currentY = p.y;
-					p.vx = 0;
-					p.vy = 0;
-					p.color = COLORS[Math.floor(Math.random() * COLORS.length)];
-				}
-
-				const dotSize = 1;
-				const px = ~~p.currentX;
-				const py = ~~p.currentY;
-
-				// Draw particle
-				for (let dx = 0; dx < dotSize; dx++) {
-					for (let dy = 0; dy < dotSize; dy++) {
-						const nx = px + dx;
-						const ny = py + dy;
-						if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-							const n = (nx + ny * w) * 4;
-							data[n] = p.color.r;
-							data[n + 1] = p.color.g;
-							data[n + 2] = p.color.b;
-							data[n + 3] = 255;
-						}
-					}
-				}
-			}
-
-			ctx.putImageData(imageData, 0, 0);
 		}
 
 		requestAnimationFrame(step);
@@ -315,34 +312,36 @@
 		my = e.clientY - bounds.top;
 	}
 
-	function handleScroll() {
-		const currentScroll = window.scrollY;
-		scrollVelocity = Math.abs(currentScroll - lastScrollY) * 0.01;
-		lastScrollY = currentScroll;
-
-		clearTimeout(scrollTimeout);
-		scrollTimeout = window.setTimeout(() => {
-			scrollVelocity *= 0.9;
-			if (scrollVelocity < 0.1) scrollVelocity = 0;
-		}, 50);
-	}
-
 	onMount(() => {
 		ctx = canvas.getContext('2d')!;
 		handleResize();
 		window.addEventListener('resize', handleResize);
-		window.addEventListener('scroll', handleScroll);
+
+		// Setup intersection observer
+		observer = new IntersectionObserver(
+			(entries) => {
+				isInView = entries[0].isIntersecting;
+			},
+			{ rootMargin: '100px' }
+		);
+
+		observer.observe(container);
 		step();
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
-			window.removeEventListener('scroll', handleScroll);
+			observer.disconnect();
 		};
 	});
 </script>
 
-<div bind:this={container} on:mousemove={handleMouseMove} class="spaceman-container">
-	<canvas bind:this={canvas}></canvas>
+<div
+	bind:this={container}
+	on:mousemove={handleMouseMove}
+	class="spaceman-container"
+	style="transform: translateZ(0); contain: content;"
+>
+	<canvas bind:this={canvas} style="transform: translateZ(0)"></canvas>
 </div>
 
 <style>
@@ -353,9 +352,14 @@
 		width: 1000px;
 		height: 1000px;
 		overflow: hidden;
+		will-change: transform;
+		contain: content;
 	}
 
 	canvas {
 		display: block;
+		will-change: transform;
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
 	}
 </style>

@@ -3,8 +3,11 @@
 	import ParticleAnimation from '$lib/components/ParticleAnimation.svelte';
 	import Spaceman from '$lib/components/Spaceman.svelte';
 	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
+	import Starfield from '$lib/components/Starfield.svelte';
 	let heroText = $state('APRIL ZOE');
 	let y: number = $state(0);
+
+	// find better word for gigs:
 </script>
 
 <svelte:window bind:scrollY={y} />
@@ -23,19 +26,13 @@
 >
 	<div
 		class="spaceman-wrap absolute right-0 top-0"
-		style="top: 400px; transform: translateY({-y * 0.5}px) "
+		style="top: 400px; transform: translateY({-y * 0.3}px) "
 	>
-		<!-- <img
-			src="/spaceman-2-bw.png"
-			class="spaceman-1"
-			style="transform: translateY({-y * 0.2}px) rotate(-{y * 0.03}deg)"
-		/> -->
-		<!-- particleSpace = follow Y but min 0.8 and max 10 -->
 		<Spaceman particleSpace={1.2} />
 	</div>
 	<div class="mb-20 flex flex-col gap-10">
 		<h1
-			class="z-10 w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
+			class=" w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
 		>
 			Sentinel, Content creator, gamer, degen
 		</h1>
@@ -55,16 +52,16 @@
 		</div>
 	</div>
 
-	<div class="relative z-10 mt-20 flex flex-col gap-10">
+	<div class="relative mt-20 flex flex-col gap-10">
 		<h2
 			class="w-full font-sans text-5xl font-extrabold uppercase text-transparent text-white md:text-5xl xl:w-3/4"
 		>
-			Gigs
+			GIGS
 		</h2>
 
 		<div class="flex flex-col gap-10 md:flex-row">
 			<div class="flex flex-col gap-10 xl:flex-row">
-				<div class="animated-border flex flex-1 flex-col items-start gap-7 bg-white/10 p-10">
+				<div class="animated-border flex flex-1 flex-col items-start gap-7 p-10">
 					<div
 						class="flex w-full flex-1 flex-row items-center justify-between gap-2"
 						style="height:60px; max-height:60px; min-height:60px;"
@@ -103,7 +100,9 @@
 					</div>
 				</div>
 
-				<div class="animated-border flex flex-1 flex-col items-start gap-7 bg-white/10 p-10">
+				<div
+					class="animated-border animated-border-alternate-speed flex flex-1 flex-col items-start gap-7 p-10"
+				>
 					<div
 						class="flex w-full flex-1 flex-row items-center justify-between gap-2"
 						style="height:60px; max-height:60px; min-height:60px;"
@@ -185,6 +184,10 @@
 	</div>
 </div>
 
+<!-- {#if y > 1500}
+	<Starfield size={2000} className="starfield-1" />
+{/if} -->
+
 <!-- 
 <div class="absolute bottom-40 left-0 flex w-full items-center justify-center">
 	<a href="/about" class="open-sans-bold text-1xl text-white">Follow</a>
@@ -249,6 +252,10 @@
 		animation: shine 14s alternate infinite;
 	}
 
+	.animated-border-alternate-speed::before {
+		animation: shine 19s alternate infinite;
+	}
+
 	@keyframes shine {
 		0% {
 			transform: translate(-100%, -100%);
@@ -260,6 +267,13 @@
 
 	/* Optional: Add a subtle permanent border */
 	.animated-border {
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		background-color: #24215430;
+	}
+
+	:global(.starfield-1) {
+		position: absolute;
+		top: 150vh;
+		left: 0;
+		z-index: -1;
 	}
 </style>

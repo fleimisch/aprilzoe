@@ -9,7 +9,7 @@
 	const baseThickness = Math.pow(80, 2.6);
 	let currentThickness = $state(baseThickness);
 	const MARGIN = 100;
-	const COLOR = 110;
+	const COLOR = 80;
 	const DRAG = 0.95;
 	const EASE = 0.25;
 
@@ -42,17 +42,18 @@
 
 	// Constants - define the exact thickness values we want
 	const INITIAL_THICKNESS = Math.pow(80, 2.6);
-	const BREATH_SPEED = 0.001;
+	const BREATH_SPEED = 0.0007;
 
 	// State
 	let isMouseOut = $state(false);
 	let breathingAnimationId: number | null = null;
+	let hasInteracted = $state(false);
 
 	// Breathing animation function
 	function startBreathing() {
 		const breathe = () => {
 			const time = Date.now() * BREATH_SPEED;
-			const breatheFactor = 1.5 + Math.sin(time) * 3.5;
+			const breatheFactor = 5.5 + Math.sin(time) * 0.5;
 			currentThickness = INITIAL_THICKNESS * breatheFactor;
 			breathingAnimationId = requestAnimationFrame(breathe);
 		};
@@ -69,18 +70,19 @@
 
 	// Mouse handlers
 	function handleMouseLeave() {
-		if ($device.isDesktop) {
+		if ($device.isDesktop && hasInteracted) {
 			isMouseOut = true;
 			mx = w / 2;
-			my = h * 0.7;
+			my = h * 0.9;
 			startBreathing();
 		}
 	}
 
 	function handleMouseEnter() {
+		hasInteracted = true;
 		isMouseOut = false;
 		stopBreathing();
-		currentThickness = INITIAL_THICKNESS; // Reset to initial value
+		currentThickness = INITIAL_THICKNESS;
 	}
 
 	// Cleanup on component destruction
@@ -192,7 +194,7 @@
 					});
 				}
 			}
-		}, 100); // Debounce delay
+		}, 20); // Debounce delay
 	}, 60); // Throttle to ~60fps
 
 	function init() {
@@ -342,7 +344,6 @@
 			ctx = canvas.getContext('2d');
 			outlineCtx = outlineCanvas.getContext('2d');
 
-			// Set initial dimensions
 			w = canvas.width = window.innerWidth;
 			h = canvas.height = window.innerHeight + 400;
 
@@ -351,11 +352,10 @@
 				outlineCanvas.height = h;
 			}
 
-			// Set initial mouse position
-			mx = w / 2;
-			my = h / 2;
+			// Set initial mouse position far outside the visible area
+			mx = -1000;
+			my = -1000;
 
-			// Start the animation process
 			loadFont().then(() => {
 				init();
 				step();
