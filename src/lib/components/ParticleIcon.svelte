@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import ParticleText from './ParticleText.svelte';
 	import { toast } from '$lib/utilities/toast';
+	import { device } from '$lib/stores/device';
 	export let icon: string;
 	export let size: number = 200;
 	export let title: string = '';
@@ -180,7 +181,7 @@
 
 	function handleClick() {
 		if (link) {
-			window.open(link, '_blank');
+			window.open(link, $device.isDesktop ? '_blank' : '_self');
 		} else {
 			// copy title to clipboard
 			navigator.clipboard.writeText(title);

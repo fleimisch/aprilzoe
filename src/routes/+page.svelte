@@ -22,7 +22,7 @@
 <div class="glow second"></div>
 
 <div
-	class="content-frame container relative mx-auto mb-20 flex flex-col gap-10 overflow-hidden px-6 md:overflow-visible md:px-20"
+	class="content-frame container relative mx-auto mb-20 flex flex-col gap-10 overflow-hidden px-5 md:overflow-visible md:px-20"
 >
 	<div
 		class="spaceman-wrap absolute right-0 top-0"
@@ -61,7 +61,7 @@
 
 		<div class="flex flex-col gap-10 md:flex-row">
 			<div class="flex flex-col gap-10 xl:flex-row">
-				<div class="animated-border flex flex-1 flex-col items-start gap-7 p-10">
+				<div class="animated-border flex flex-1 flex-col items-start gap-7 p-5 xl:p-10">
 					<div
 						class="flex w-full flex-1 flex-row items-center justify-between gap-2"
 						style="height:60px; max-height:60px; min-height:60px;"
@@ -101,7 +101,7 @@
 				</div>
 
 				<div
-					class="animated-border animated-border-alternate-speed flex flex-1 flex-col items-start gap-7 p-10"
+					class="animated-border animated-border-alternate-speed flex flex-1 flex-col items-start gap-7 p-5 xl:p-10"
 				>
 					<div
 						class="flex w-full flex-1 flex-row items-center justify-between gap-2"
@@ -149,7 +149,7 @@
 			In collaboration with Apeinzoo
 		</h3>
 
-		<div class="mt-10 flex flex-col gap-10 md:flex-row">adasds</div>
+		<div class="mt-10 flex flex-col gap-10 md:flex-row"></div>
 	</div>
 
 	<div class="mt-20 flex flex-col gap-5">

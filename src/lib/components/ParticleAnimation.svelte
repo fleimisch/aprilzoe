@@ -9,7 +9,7 @@
 	const baseThickness = Math.pow(80, 2.6);
 	let currentThickness = $state(baseThickness);
 	const MARGIN = 100;
-	const COLOR = 80;
+	const COLOR = 100;
 	const DRAG = 0.95;
 	const EASE = 0.25;
 
@@ -36,7 +36,7 @@
 	let canvasHeight: number;
 
 	let outlineList: any[] = [];
-	const OUTLINE_SPACING = 3;
+	const OUTLINE_SPACING = 2;
 
 	let handlePosition = $derived(((currentThickness - 2000) / (200000 - 2000)) * 100);
 
@@ -357,8 +357,10 @@
 			my = -1000;
 
 			loadFont().then(() => {
-				init();
-				step();
+				setTimeout(() => {
+					init();
+					step();
+				}, 100);
 			});
 		}
 
