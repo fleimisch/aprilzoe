@@ -7,6 +7,7 @@
 	export let size: number = 200;
 	export let title: string = '';
 	export let link: string = '';
+	export let clipboard: string = '';
 
 	let w = size;
 	let h = size;
@@ -59,39 +60,51 @@
 		isMouseOver = false; // Mouse has left the canvas
 	}
 
-	function extractSVGPoints(svg: string): Promise<ImageData> {
+	function extractSVGPoints(svgPath: string): Promise<ImageData> {
 		return new Promise((resolve) => {
 			const img = new Image();
 			const tempCanvas = document.createElement('canvas');
 			const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
 
-			img.onload = () => {
-				tempCanvas.width = w;
-				tempCanvas.height = h;
+			// Use XMLHttpRequest as specified in the solution
+			const request = new XMLHttpRequest();
+			request.open('GET', svgPath, true);
 
-				if (tempCtx) {
-					// Clear canvas with black background
-					tempCtx.fillStyle = 'black';
-					tempCtx.fillRect(0, 0, w, h);
+			request.onload = function () {
+				// Parse the SVG and add required attributes
+				const parser = new DOMParser();
+				const result = parser.parseFromString(request.responseText, 'text/xml');
+				const inlineSVG = result.getElementsByTagName('svg')[0];
 
-					// Calculate scale to fit icon with padding
-					const padding = w * 0.2; // 20% padding
-					const scale = Math.min((w - padding * 2) / img.width, (h - padding * 2) / img.height);
-					const scaledWidth = img.width * scale;
-					const scaledHeight = img.height * scale;
-					const x = (w - scaledWidth) / 2;
-					const y = (h - scaledHeight) / 2;
+				// Set explicit dimensions
+				inlineSVG.setAttribute('width', `${w}px`);
+				inlineSVG.setAttribute('height', `${h}px`);
 
-					// Draw the SVG in white
-					tempCtx.fillStyle = 'white';
-					tempCtx.fill();
-					tempCtx.drawImage(img, x, y, scaledWidth, scaledHeight);
+				// Convert to base64
+				const svg64 = btoa(new XMLSerializer().serializeToString(inlineSVG));
+				const image64 = 'data:image/svg+xml;base64,' + svg64;
 
-					resolve(tempCtx.getImageData(0, 0, w, h));
-				}
+				img.onload = () => {
+					tempCanvas.width = w;
+					tempCanvas.height = h;
+
+					if (tempCtx) {
+						// Clear canvas with black background
+						tempCtx.fillStyle = 'black';
+						tempCtx.fillRect(0, 0, w, h);
+
+						// Draw the SVG in white
+						tempCtx.fillStyle = 'white';
+						tempCtx.drawImage(img, w * 0.2, w * 0.2, w * 0.6, h * 0.6);
+
+						resolve(tempCtx.getImageData(0, 0, w, h));
+					}
+				};
+
+				img.src = image64;
 			};
 
-			img.src = icon;
+			request.send();
 		});
 	}
 
@@ -183,12 +196,10 @@
 		if (link) {
 			window.open(link, $device.isDesktop ? '_blank' : '_self');
 		} else {
-			// copy title to clipboard
-			navigator.clipboard.writeText(title);
-			// show toast
-			// make a toast
-
-			toast.success('Copied to clipboard');
+			if (clipboard) {
+				navigator.clipboard.writeText(clipboard);
+				toast.success('Copied to clipboard');
+			}
 		}
 	}
 </script>

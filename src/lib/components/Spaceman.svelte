@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	let { particleSpace = 0.8 } = $props();
 
@@ -41,39 +41,61 @@
 	let isInView = true;
 	let observer: IntersectionObserver;
 	let imageData: ImageData;
+	let animationFrameId: number | null = null;
 
-	function extractSVGPoints(svg: string): Promise<ImageData> {
+	function extractSVGPoints(svgPath: string): Promise<ImageData> {
 		return new Promise((resolve) => {
 			const img = new Image();
 			const tempCanvas = document.createElement('canvas');
 			const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
 
-			img.onload = () => {
-				tempCanvas.width = w;
-				tempCanvas.height = h;
+			// Request the SVG file
+			fetch(svgPath)
+				.then((response) => response.text())
+				.then((svgContent) => {
+					// Parse the SVG content
+					const parser = new DOMParser();
+					const result = parser.parseFromString(svgContent, 'text/xml');
+					const inlineSVG = result.getElementsByTagName('svg')[0];
 
-				if (tempCtx) {
-					// Clear canvas with black background
-					tempCtx.fillStyle = 'black';
-					tempCtx.fillRect(0, 0, w, h);
+					// Add explicit width and height attributes for Firefox
+					inlineSVG.setAttribute('width', '1000px');
+					inlineSVG.setAttribute('height', '1000px');
 
-					// Center and scale the image
-					const scale = Math.min(w / img.width, h / img.height) * 0.65;
-					const scaledWidth = img.width * scale;
-					const scaledHeight = img.height * scale;
-					const x = (w - scaledWidth) / 2;
-					const y = (h - scaledHeight) / 2;
+					// Convert the modified SVG to a data URI
+					const svg64 = btoa(new XMLSerializer().serializeToString(inlineSVG));
+					const image64 = 'data:image/svg+xml;base64,' + svg64;
 
-					// Draw the SVG in white
-					tempCtx.fillStyle = 'white';
-					tempCtx.fill();
-					tempCtx.drawImage(img, x, y, scaledWidth, scaledHeight);
+					// Set the image source
+					img.onload = () => {
+						tempCanvas.width = w;
+						tempCanvas.height = h;
 
-					resolve(tempCtx.getImageData(0, 0, w, h));
-				}
-			};
+						if (tempCtx) {
+							// Clear canvas with black background
+							tempCtx.fillStyle = 'black';
+							tempCtx.fillRect(0, 0, w, h);
 
-			img.src = svg;
+							// Center and scale the image
+							const scale = Math.min(w / img.width, h / img.height) * 0.65;
+							const scaledWidth = img.width * scale;
+							const scaledHeight = img.height * scale;
+							const x = (w - scaledWidth) / 2;
+							const y = (h - scaledHeight) / 2;
+
+							// Draw the SVG in white
+							tempCtx.fillStyle = 'white';
+							tempCtx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+							resolve(tempCtx.getImageData(0, 0, w, h));
+						}
+					};
+
+					img.src = image64;
+				})
+				.catch((error) => {
+					console.error('Error loading or processing SVG:', error);
+				});
 		});
 	}
 
@@ -303,7 +325,7 @@
 			}
 		}
 
-		requestAnimationFrame(step);
+		animationFrameId = requestAnimationFrame(step);
 	}
 
 	function handleMouseMove(e: MouseEvent) {
@@ -332,6 +354,47 @@
 			window.removeEventListener('resize', handleResize);
 			observer.disconnect();
 		};
+	});
+
+	onDestroy(() => {
+		// Cancel any pending animations
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+		}
+
+		// Clear all particle arrays
+		particles = [];
+		backgroundParticles = [];
+		outlineParticles = [];
+
+		// Clear canvas context
+		if (ctx) {
+			ctx.clearRect(0, 0, w, h);
+			// @ts-ignore
+			ctx = null;
+		}
+
+		// Clear canvas reference
+		// @ts-ignore
+		canvas = null;
+
+		// Clear container reference
+		// @ts-ignore
+		container = null;
+
+		// Clear ImageData reference
+		// @ts-ignore
+		imageData = null;
+
+		// Clear event listeners
+		window.removeEventListener('resize', handleResize);
+
+		// Disconnect the intersection observer
+		if (observer) {
+			observer.disconnect();
+			// @ts-ignore
+			observer = null;
+		}
 	});
 </script>
 

@@ -48,6 +48,7 @@
 	let isMouseOut = $state(false);
 	let breathingAnimationId: number | null = null;
 	let hasInteracted = $state(false);
+	let animationFrameId: number | null = null;
 
 	// Breathing animation function
 	function startBreathing() {
@@ -87,7 +88,43 @@
 
 	// Cleanup on component destruction
 	onDestroy(() => {
+		// Cancel any pending animations
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+		}
+
+		// Stop breathing animation if running
 		stopBreathing();
+
+		// Clear all particle arrays
+		list = [];
+		outlineList = [];
+
+		// Clear canvas contexts
+		if (ctx) {
+			ctx.clearRect(0, 0, w, h);
+			// @ts-ignore
+			ctx = null;
+		}
+		if (outlineCtx) {
+			outlineCtx.clearRect(0, 0, w, h);
+			// @ts-ignore
+			outlineCtx = null;
+		}
+
+		// Clear canvas references
+		// @ts-ignore
+		canvas = null;
+		// @ts-ignore
+		outlineCanvas = null;
+
+		// Clear event listeners
+		window.removeEventListener('resize', handleResize);
+
+		// Clear any remaining timeouts
+		if (tmr1) {
+			clearTimeout(tmr1);
+		}
 	});
 
 	// Add throttle utility at the top of the script
@@ -299,7 +336,7 @@
 			strokeOffset -= 1;
 		}
 
-		requestAnimationFrame(step);
+		animationFrameId = requestAnimationFrame(step);
 	}
 
 	function handleMouseMove(e: MouseEvent) {
@@ -367,6 +404,15 @@
 		return () => {
 			window.removeEventListener('resize', handleResize);
 		};
+	});
+
+	onDestroy(() => {
+		// clear all traces of particles, clear memory etc
+		list = [];
+		outlineList = [];
+		list.length = 0;
+		outlineList.length = 0;
+		window.removeEventListener('resize', handleResize);
 	});
 
 	// Add these functions to handle dragging

@@ -8,16 +8,19 @@
 
 	let heroText = $state('APRIL ZOE');
 	let y: number = $state(0);
+	let windowHeight: number = $state(0);
 
 	// find better word for gigs:
 </script>
 
-<svelte:window bind:scrollY={y} />
+<svelte:window bind:scrollY={y} bind:innerHeight={windowHeight} />
 
 <!-- <input type="text" bind:value={heroText} /> -->
 <ScrollDownIcon />
 <div class="relative" style="padding-bottom: 200vh">
-	<ParticleAnimation bind:text={heroText} />
+	{#if y < windowHeight * 1.2}
+		<ParticleAnimation bind:text={heroText} />
+	{/if}
 </div>
 
 <div class="glow"></div>
@@ -30,7 +33,7 @@
 		class="spaceman-wrap absolute right-0 top-0"
 		style="top: 200px; transform: translateY({-y * 0.3}px) "
 	>
-		<Spaceman particleSpace={1.2} />
+		<Spaceman particleSpace={1.1} />
 	</div>
 	<div class="mb-20 flex flex-col gap-10">
 		<h1
@@ -69,7 +72,7 @@
 						style="height:60px; max-height:60px; min-height:60px;"
 					>
 						<img src="/galactica-white.svg" class="h-10" />
-						<p class="text-white/05 hidden text-sm xl:block">Jun 2024 - present</p>
+						<!-- <p class="text-white/05 hidden text-sm xl:block">Jun 2024 - present</p> -->
 					</div>
 					<p
 						class="text-lg leading-normal text-white md:text-2xl"
@@ -118,7 +121,7 @@
 							<img src="/xborg.svg" class="h-10" />
 							<img src="/swissborg.svg" class="h-7" />
 						</div>
-						<p class="text-white/05 text-sm">Oct 2024 - present</p>
+						<!-- <p class="text-white/05 text-sm">Oct 2024 - present</p> -->
 					</div>
 					<p
 						class="text-lg leading-normal text-white md:text-2xl"
@@ -177,7 +180,7 @@
 		<div class=" flex flex-row" style="margin-left:-20px">
 			<ParticleIcon icon="x.svg" size={100} title="X" link="https://x.com/April_Zoe_AZ" />
 			<ParticleIcon icon="telegram.svg" size={100} title="Telegram" link="https://t.me/April_Zoe" />
-			<ParticleIcon icon="discord.svg" size={100} title="Discord @aprilzoe8728" />
+			<ParticleIcon icon="discord.svg" size={100} title="Discord" clipboard="@aprilzoe8728" />
 			<ParticleIcon
 				icon="phaver.svg"
 				size={100}
@@ -199,8 +202,8 @@
 	</div>
 </div>
 
-<!-- {#if y > 1500}
-	<Starfield size={2000} className="starfield-1" />
+<!-- {#if y > windowHeight * 1.3}
+	<Starfield size={4000} className="starfield-1" />
 {/if} -->
 
 <!-- 
@@ -286,9 +289,9 @@
 	}
 
 	:global(.starfield-1) {
-		position: absolute;
+		position: fixed;
 		top: 150vh;
-		left: 0;
+		left: -30%;
 		z-index: -1;
 	}
 </style>

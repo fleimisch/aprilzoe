@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
 
 	const { size = 100, className = '' } = $props();
@@ -10,6 +10,7 @@
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
 	let particles: any[] = [];
+	let animationFrameId: number | null = null;
 
 	const PARTICLES_COUNT = 800;
 	const EASE = 0.25;
@@ -83,13 +84,38 @@
 		}
 
 		ctx.putImageData(imageData, 0, 0);
-		requestAnimationFrame(step);
+		animationFrameId = requestAnimationFrame(step);
 	}
 
 	onMount(() => {
 		ctx = canvas.getContext('2d')!;
 		initParticles();
 		step();
+	});
+
+	onDestroy(() => {
+		// Cancel any pending animations
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+		}
+
+		// Clear all particle arrays
+		particles = [];
+
+		// Clear canvas context
+		if (ctx) {
+			ctx.clearRect(0, 0, w, h);
+			// @ts-ignore
+			ctx = null;
+		}
+
+		// Clear canvas reference
+		// @ts-ignore
+		canvas = null;
+
+		// Clear container reference
+		// @ts-ignore
+		container = null;
 	});
 </script>
 
@@ -104,7 +130,6 @@
 
 <style>
 	.starfield-container {
-		position: absolute;
 		overflow: hidden;
 	}
 
