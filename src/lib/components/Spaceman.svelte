@@ -42,6 +42,7 @@
 	let observer: IntersectionObserver;
 	let imageData: ImageData;
 	let animationFrameId: number | null = null;
+	let isRunning = $state(false);
 
 	function extractSVGPoints(svgPath: string): Promise<ImageData> {
 		return new Promise((resolve) => {
@@ -181,10 +182,24 @@
 		initOutlineParticles();
 	}
 
-	function step() {
-		if (!ctx) return;
+	function startAnimation() {
+		if (!isRunning) {
+			isRunning = true;
+			step();
+		}
+	}
 
-		// Only render when in view or nearby
+	function stopAnimation() {
+		isRunning = false;
+		if (animationFrameId) {
+			cancelAnimationFrame(animationFrameId);
+			animationFrameId = null;
+		}
+	}
+
+	function step() {
+		if (!isRunning || !ctx) return;
+
 		if (isInView) {
 			const centerX = w / 2;
 			const centerY = h / 2;
@@ -339,57 +354,50 @@
 		handleResize();
 		window.addEventListener('resize', handleResize);
 
-		// Setup intersection observer
+		// Setup intersection observer with more aggressive optimization
 		observer = new IntersectionObserver(
 			(entries) => {
-				isInView = entries[0].isIntersecting;
+				entries.forEach((entry) => {
+					isInView = entry.isIntersecting;
+					if (entry.isIntersecting) {
+						startAnimation();
+					} else {
+						stopAnimation();
+					}
+				});
 			},
-			{ rootMargin: '100px' }
+			{
+				rootMargin: '100px', // Smaller margin since spaceman is usually a larger element
+				threshold: 0
+			}
 		);
 
 		observer.observe(container);
-		step();
-
-		return () => {
-			window.removeEventListener('resize', handleResize);
-			observer.disconnect();
-		};
 	});
 
 	onDestroy(() => {
-		// Cancel any pending animations
-		if (animationFrameId !== null) {
-			cancelAnimationFrame(animationFrameId);
-		}
+		stopAnimation(); // Make sure to stop the animation
 
-		// Clear all particle arrays
+		// Rest of existing cleanup...
 		particles = [];
 		backgroundParticles = [];
 		outlineParticles = [];
 
-		// Clear canvas context
 		if (ctx) {
 			ctx.clearRect(0, 0, w, h);
 			// @ts-ignore
 			ctx = null;
 		}
 
-		// Clear canvas reference
 		// @ts-ignore
 		canvas = null;
-
-		// Clear container reference
 		// @ts-ignore
 		container = null;
-
-		// Clear ImageData reference
 		// @ts-ignore
 		imageData = null;
 
-		// Clear event listeners
 		window.removeEventListener('resize', handleResize);
 
-		// Disconnect the intersection observer
 		if (observer) {
 			observer.disconnect();
 			// @ts-ignore

@@ -240,7 +240,21 @@
 		window.addEventListener('resize', handleResize);
 	}
 
+	// Add these variables at the top
+	let isInView = $state(false);
+	let observer: IntersectionObserver;
+
 	function step() {
+		// Only proceed if in view and context exists
+		if (!isInView || !ctx) {
+			// Schedule next frame but don't do any work
+			animationFrameId = requestAnimationFrame(step);
+			return;
+		}
+
+		// Only log when actually rendering
+		// console.log('Rendering frame');  // Uncomment to debug
+
 		if ((tog = !tog)) {
 			// Update both main and outline particles
 			const allParticles = [...list, ...outlineList];
@@ -401,6 +415,24 @@
 			});
 		}
 
+		// Setup intersection observer
+		observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					isInView = entry.isIntersecting;
+				});
+			},
+			{
+				// Start loading slightly before it comes into view
+				rootMargin: '200px 0px',
+				threshold: 0
+			}
+		);
+
+		if (container) {
+			observer.observe(container);
+		}
+
 		return () => {
 			window.removeEventListener('resize', handleResize);
 		};
@@ -413,6 +445,13 @@
 		list.length = 0;
 		outlineList.length = 0;
 		window.removeEventListener('resize', handleResize);
+
+		// Add observer cleanup to existing destroy logic
+		if (observer) {
+			observer.disconnect();
+			// @ts-ignore
+			observer = null;
+		}
 	});
 
 	// Add these functions to handle dragging

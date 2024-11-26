@@ -149,24 +149,51 @@
 		</div>
 	</div>
 
-	<div class="mt-20 flex flex-col gap-2">
-		<h2
-			class="w-full font-sans text-5xl font-extrabold uppercase text-transparent text-white md:text-5xl xl:w-3/4"
-		>
-			Development
-		</h2>
-		<h3 class=" font-sans text-2xl font-extrabold uppercase text-white">
-			In collaboration with Apeinzoo
-		</h3>
+	<div class="relative mt-20 flex flex-1 flex-row items-start gap-10 overflow-hidden p-5 xl:p-10">
+		<div class=" z-20 flex w-1/3 flex-col gap-2" style="height:510px">
+			<h2
+				class="w-full font-sans text-5xl font-extrabold uppercase text-transparent text-white md:text-5xl xl:w-3/4"
+			>
+				Development
+			</h2>
+			<h3 class=" font-sans text-2xl font-extrabold uppercase text-white">
+				Collaborative Innovations
+			</h3>
 
-		<div class="mt-10 flex flex-col gap-10 md:flex-row">
-			Coming soon
-			<!-- <div class="flex flex-col gap-10 xl:flex-row">
+			<div class="mt-5 flex flex-col gap-4 text-lg text-white/75">
+				<p>
+					In collaboration with <a
+						class=" text-white hover:text-white/50"
+						href="https://x.com/apeinzoo"
+						target="_blank">Apeinzoo</a
+					>, we focused on creating tools tailored to the needs of the XBorg community—either those
+					directly demanded by the community or those identified as highly useful for holders.
+				</p>
+				<p>
+					The Pledge Calculator simplifies the process of managing XBorg pledges, enabling users to
+					calculate and optimize their contributions effortlessly. Meanwhile, the Diamond Program
+					Page offers an intuitive platform for tracking and engaging with the exclusive Diamond
+					rewards program, ensuring transparency and accessibility for all participants.
+				</p>
+				<!-- <div class="flex flex-col gap-10 xl:flex-row">
 				<img src="/development-pledge.png" class="" />
 			</div>
 			<div class="flex flex-col gap-10 xl:flex-row">
 				<img src="/development-diamonds.png" class="" />
 			</div> -->
+			</div>
+		</div>
+
+		<div
+			class="development-images animated-border2 relative hidden w-2/3 overflow-hidden lg:flex"
+			style="height:620px"
+		>
+			<img
+				src="/development-rewards.png"
+				class="fade-out-left absolute right-0 top-0"
+				width="100%"
+				style="transform: translateY({-y + scrollY}px)"
+			/>
 		</div>
 	</div>
 
@@ -241,16 +268,38 @@
 		z-index: 2;
 	}
 
-	.animated-border {
+	.animated-border,
+	.animated-border2 {
 		position: relative;
 		border-radius: 1px;
 		overflow: hidden;
 	}
 
-	.animated-border * {
+	.animated-border *,
+	.animated-border2 * {
 		z-index: 2;
 	}
 	.animated-border::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 200%;
+		z-index: 1;
+		height: 200%;
+		background: linear-gradient(
+			115deg,
+			transparent,
+			transparent,
+			rgba(255, 255, 255, 0.082),
+			transparent,
+			transparent
+		);
+		transform: translate(-100%, -100%);
+		animation: shine 14s alternate infinite;
+	}
+
+	.animated-border2::before {
 		content: '';
 		position: absolute;
 		top: 0;
@@ -286,6 +335,20 @@
 	/* Optional: Add a subtle permanent border */
 	.animated-border {
 		background-color: #24215430;
+	}
+
+	.animated-border2 {
+		background: linear-gradient(162deg, transparent, rgb(136 38 195 / 13%));
+	}
+
+	.fade-out-left {
+		-webkit-mask-image: linear-gradient(
+			to left,
+			rgba(0, 0, 0, 1) 50%,
+			/* Fully visible from center to right */ rgba(0, 0, 0, 0) 100%
+				/* Completely transparent on the left */
+		);
+		mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
 	}
 
 	:global(.starfield-1) {
