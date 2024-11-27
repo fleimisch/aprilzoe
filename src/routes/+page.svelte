@@ -5,8 +5,12 @@
 	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
 	import Starfield from '$lib/components/Starfield.svelte';
 	import SvgIcon from '$lib/components/elements/SvgIcon.svelte';
+	import { page } from '$app/stores';
 
 	let heroText = $state('APRIL ZOE');
+	if ($page.url.searchParams.get('hero')) {
+		heroText = $page.url.searchParams.get('hero') || 'APRIL ZOE';
+	}
 	let y: number = $state(0);
 	let windowHeight: number = $state(0);
 
