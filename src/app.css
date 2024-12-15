@@ -7,3 +7,14 @@ body {
   color: white;
   overflow-x: hidden !important;
 }
+
+.layoutPageFrame {
+	transition: filter 0.3s ease-in-out;
+}
+body.overflow-hidden .layoutPageFrame {
+	filter: grayscale(80%);
+}
+
+.z-2 {
+	z-index: 2;
+}

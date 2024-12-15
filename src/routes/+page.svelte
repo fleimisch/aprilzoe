@@ -6,6 +6,7 @@
 	import Starfield from '$lib/components/Starfield.svelte';
 	import SvgIcon from '$lib/components/elements/SvgIcon.svelte';
 	import { page } from '$app/stores';
+	import { device } from '$lib/stores/device';
 
 	let heroText = $state('APRIL ZOE');
 	if ($page.url.searchParams.get('hero')) {
@@ -13,6 +14,9 @@
 	}
 	let y: number = $state(0);
 	let windowHeight: number = $state(0);
+
+	let readMore_galactica = $state(false);
+	let readMore_xborg = $state(false);
 
 	// find better word for gigs:
 </script>
@@ -39,7 +43,7 @@
 	>
 		<Spaceman particleSpace={1.1} />
 	</div>
-	<div class="mb-20 flex flex-col gap-10">
+	<div id="about" class="mb-20 flex flex-col gap-10">
 		<h1
 			class=" w-full bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
 		>
@@ -47,12 +51,12 @@
 		</h1>
 
 		<div class=" flex flex-col gap-4 md:w-2/3">
-			<p class="z-10 text-lg leading-normal text-white/75 md:text-2xl">
+			<p class="z-2 text-lg leading-normal text-white/75 md:text-2xl">
 				Passionate about crypto, I focus on advancing decentralization and privacy to reshape online
 				identity, reputation, and trust.
 			</p>
 
-			<p class="z-10 text-lg leading-normal text-white/75 md:text-2xl">
+			<p class="z-2 text-lg leading-normal text-white/75 md:text-2xl">
 				Through content creation, moderation, and community management, efforts center on raising
 				awareness and promoting solutions tied to decentralized identity, Web3 gaming, and community
 				building. The goal is to enhance transparency, strengthen reputation management, and empower
@@ -61,16 +65,14 @@
 		</div>
 	</div>
 
-	<div class="relative mt-20 flex flex-col gap-10">
-		<!-- <h2
-			class="w-full font-sans text-5xl font-extrabold uppercase text-transparent text-white md:text-5xl xl:w-3/4"
-		>
-			GIGS
-		</h2> -->
-
+	<div class="relative flex flex-col gap-10" class:mt-20={$device.isDesktop}>
 		<div class="flex flex-col gap-10 md:flex-row">
-			<div class="flex flex-col gap-10 xl:flex-row">
-				<div class="animated-border flex flex-1 flex-col items-start gap-7 p-5 xl:p-10">
+			<div
+				class="flex flex-col xl:flex-row"
+				class:gap-10={$device.isDesktop}
+				class:gap-5={!$device.isDesktop}
+			>
+				<div class="animated-border flex flex-1 flex-col items-start gap-5 p-5 xl:p-10">
 					<div
 						class="flex w-full flex-1 flex-row items-center justify-between gap-2"
 						style="height:60px; max-height:60px; min-height:60px;"
@@ -86,31 +88,51 @@
 					</p>
 
 					<div class="flex flex-col gap-4 text-lg text-white/75">
-						<p>
-							As a Sentinel, I serve as an ambassador, educator, and early adopter of the Galactica
-							Network, actively promoting and supporting decentralized technology. Alongside this
-							role, I am a Discord moderator, investor, node operator, and CypherUNI Faction Leader,
-							where I lead community management and business initiatives and drive awareness of
-							decentralized protocols.
-						</p>
-						<p>
-							Additionally, I collaborate closely with Galactica's core team to enhance the
-							project's visibility, engage the community, and retain high-value members by providing
-							meaningful opportunities and fostering strong connections and detecting potential
-							synergies between partners.
-						</p>
-						<p>
-							<a
-								href="https://galactica.com/sentinels"
-								class="flex flex-row items-center gap-2"
-								target="_blank"
-								><span
-									class="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text font-sans text-base font-bold text-transparent hover:from-pink-500 hover:to-violet-500"
-									>Galactica Network Sentinels</span
+						{#if $device.isDesktop || readMore_galactica}
+							<p>
+								As a Sentinel, I serve as an ambassador, educator, and early adopter of the
+								Galactica Network, actively promoting and supporting decentralized technology.
+								Alongside this role, I am a Discord moderator, investor, node operator, and
+								CypherUNI Faction Leader, where I lead community management and business initiatives
+								and drive awareness of decentralized protocols.
+							</p>
+
+							<p>
+								Additionally, I collaborate closely with Galactica's core team to enhance the
+								project's visibility, engage the community, and retain high-value members by
+								providing meaningful opportunities and fostering strong connections and detecting
+								potential synergies between partners.
+							</p>
+							<p>
+								<a
+									href="https://galactica.com/sentinels"
+									class="flex flex-row items-center gap-2"
+									target="_blank"
+									><span
+										class="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text font-sans text-base font-bold text-transparent hover:from-pink-500 hover:to-violet-500"
+										>Galactica Network Sentinels</span
+									>
+									<SvgIcon icon="external-link" className="text-white/50" size={16} />
+								</a>
+							</p>
+							{#if !$device.isDesktop}
+								<span
+									class="flex flex-row items-center gap-2 text-sm text-white/50"
+									on:click={() => (readMore_galactica = !readMore_galactica)}
 								>
-								<SvgIcon icon="external-link" className="text-white/50" size={16} />
-							</a>
-						</p>
+									<span>Show Less</span>
+									<SvgIcon icon="minus" className="text-white/50" size={12} />
+								</span>
+							{/if}
+						{:else}
+							<span
+								class="flex flex-row items-center gap-2 text-sm text-white/50"
+								on:click={() => (readMore_galactica = !readMore_galactica)}
+							>
+								<span>Show More</span>
+								<SvgIcon icon="add-plus" className="text-white/50" size={12} />
+							</span>
+						{/if}
 					</div>
 				</div>
 
@@ -135,26 +157,49 @@
 					</p>
 
 					<div class="flex flex-col gap-4 text-lg text-white/75">
-						<p>
-							I create engaging, high-value content including in-depth threads, memes, videos,
-							trading analysis and occasionally host giveaways. I also share exclusive alpha from
-							gated NFT communities, providing actionable insights and fostering informed
-							decision-making for my audience.
-						</p>
-						<p>
-							Through these efforts, I simplify complex topics, amplify community narratives, and
-							bridge the gap between Web3 technologies and a broader audience, while staying attuned
-							to the latest trends in blockchain, gaming, and decentralized finance.
-						</p>
-						<p class="mt-10 block">None of my content is financial advice.</p>
+						{#if $device.isDesktop || readMore_xborg}
+							<p>
+								I create engaging, high-value content including in-depth threads, memes, videos,
+								trading analysis and occasionally host giveaways. I also share exclusive alpha from
+								gated NFT communities, providing actionable insights and fostering informed
+								decision-making for my audience.
+							</p>
+							<p>
+								Through these efforts, I simplify complex topics, amplify community narratives, and
+								bridge the gap between Web3 technologies and a broader audience, while staying
+								attuned to the latest trends in blockchain, gaming, and decentralized finance.
+							</p>
+							<p class="mt-10 block">None of my content is financial advice.</p>
+							{#if !$device.isDesktop}
+								<span
+									class="flex flex-row items-center gap-2 text-sm text-white/50"
+									on:click={() => (readMore_xborg = !readMore_xborg)}
+								>
+									<span>Show Less</span>
+									<SvgIcon icon="minus" className="text-white/50" size={12} />
+								</span>
+							{/if}
+						{:else}
+							<span
+								class="flex flex-row items-center gap-2 text-sm text-white/50"
+								on:click={() => (readMore_xborg = !readMore_xborg)}
+							>
+								<span>Show More</span>
+								<SvgIcon icon="add-plus" className="text-white/50" size={12} />
+							</span>
+						{/if}
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="relative mt-20 flex flex-1 flex-row items-start gap-10 overflow-hidden p-5 xl:p-10">
-		<div class=" z-20 flex w-1/3 flex-col gap-2" style="height:510px">
+	<div
+		id="development"
+		class="relative flex flex-1 flex-row items-start gap-10 overflow-hidden p-5 xl:p-10"
+		class:mt-20={$device.isDesktop}
+	>
+		<div class="z-2 flex w-1/3 flex-col gap-2" style="height:510px">
 			<h2
 				class="w-full font-sans text-5xl font-extrabold uppercase text-transparent text-white md:text-5xl xl:w-3/4"
 			>
@@ -201,7 +246,7 @@
 		</div>
 	</div>
 
-	<div class="mt-20 flex flex-col gap-5">
+	<div id="socials" class="mt-20 flex flex-col gap-5">
 		<!-- <h1
 			class="w-full bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text font-sans text-5xl font-extrabold uppercase text-transparent md:text-7xl xl:w-3/4"
 		>
