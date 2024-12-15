@@ -22,5 +22,5 @@
 		"tests/**/*.ts",
 		"src/icons-viewer/**/*.ts",
 		"src/icons-viewer/**/*.svelte"
-	]
+, "src/routes/blog/[slug]/+page.svx"	]
 }

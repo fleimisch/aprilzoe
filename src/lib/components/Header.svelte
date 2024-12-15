@@ -3,8 +3,17 @@
 	import { config } from '$lib/stores/appStates.svelte';
 	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
 	import { device } from '$lib/stores/device';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import Spaceman from '$lib/components/Spaceman.svelte';
 
 	const scrollTo = (id: string) => {
+		const _page = $page;
+
+		if (_page.url.pathname !== '/') {
+			goto('/');
+		}
+
 		config.isHamburgerOpen = false;
 		const element = document.getElementById(id);
 		if (element) {
@@ -48,8 +57,16 @@
 			</div>
 			<div class="hamburgerItems flex flex-col gap-3 pt-1">
 				<span
-					on:click={() => scrollTo('about')}
-					on:keydown={(e) => e.key === 'Enter' && scrollTo('about')}
+					on:click={() => {
+						goto('/#about');
+						config.isHamburgerOpen = false;
+					}}
+					on:keydown={(e) =>
+						e.key === 'Enter' &&
+						(() => {
+							goto('/#about');
+							config.isHamburgerOpen = false;
+						})()}
 					class="w-full cursor-pointer font-sans font-extrabold uppercase text-transparent"
 					role="button"
 					tabindex="0"
@@ -57,8 +74,14 @@
 					About
 				</span>
 				<span
-					on:click={() => scrollTo('blog')}
-					on:keydown={(e) => e.key === 'Enter' && scrollTo('about')}
+					on:click={() => {
+						config.isHamburgerOpen = false;
+						goto('/blog');
+					}}
+					on:keydown={() => {
+						config.isHamburgerOpen = false;
+						goto('/blog');
+					}}
 					class="w-full cursor-pointer font-sans font-extrabold uppercase text-transparent"
 					role="button"
 					tabindex="0"
@@ -66,8 +89,16 @@
 					Blog
 				</span>
 				<span
-					on:click={() => scrollTo('development')}
-					on:keydown={(e) => e.key === 'Enter' && scrollTo('development')}
+					on:click={() => {
+						goto('/#dapps');
+						config.isHamburgerOpen = false;
+					}}
+					on:keydown={(e) =>
+						e.key === 'Enter' &&
+						(() => {
+							goto('/#dapps');
+							config.isHamburgerOpen = false;
+						})()}
 					class="w-full cursor-pointer font-sans font-extrabold uppercase text-transparent"
 					role="button"
 					tabindex="0">dApps</span
@@ -93,6 +124,9 @@
 				</div>
 			</div>
 		</div>
+		<div class="spaceman-wrap fixed">
+			<Spaceman particleSpace={1.1} />
+		</div>
 	</div>
 {/if}
 
@@ -113,7 +147,7 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		width: 50%;
+		width: 80%;
 		height: 80%;
 		background-image: linear-gradient(99deg, rgb(255, 35, 193), rgb(129, 47, 253));
 		border-radius: 1000px;
@@ -121,15 +155,23 @@
 		z-index: 0;
 		user-select: none !important;
 		pointer-events: none !important;
-		opacity: 0.22;
+		opacity: 0.15;
 	}
 
 	.hamburgerItems > span {
 		font-size: 4.5rem;
 		line-height: 1.1;
-		color: black;
+		color: #170622;
 		text-shadow: 0px -1px 0px #ff6dc5;
 		transition: background-image 0.3s ease;
+	}
+
+	.spaceman-wrap {
+		width: 50%;
+		height: 100%;
+		right: 0;
+	}
+	:global(.spaceman-wrap *) {
 	}
 
 	.hamburger {
@@ -233,7 +275,6 @@
 			-webkit-background-clip: text;
 			color: transparent; /* Ensure text color is transparent */
 			-webkit-text-fill-color: transparent; /* Ensure text fill is transparent */
-			text-shadow: none; /* Remove text-shadow on hover */
 		}
 	}
 

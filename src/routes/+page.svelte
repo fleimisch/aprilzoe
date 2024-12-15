@@ -7,6 +7,7 @@
 	import SvgIcon from '$lib/components/elements/SvgIcon.svelte';
 	import { page } from '$app/stores';
 	import { device } from '$lib/stores/device';
+	import { config } from '$lib/stores/appStates.svelte';
 
 	let heroText = $state('APRIL ZOE');
 	if ($page.url.searchParams.get('hero')) {
@@ -26,7 +27,7 @@
 <!-- <input type="text" bind:value={heroText} /> -->
 <ScrollDownIcon />
 <div class="relative" style="padding-bottom: 200vh">
-	{#if y < windowHeight * 1.2}
+	{#if y < windowHeight * 1.2 && !config.isHamburgerOpen}
 		<ParticleAnimation bind:text={heroText} />
 	{/if}
 </div>
@@ -41,7 +42,9 @@
 		class="spaceman-wrap absolute right-0 top-0"
 		style="top: 200px; transform: translateY({-y * 0.3}px) "
 	>
-		<Spaceman particleSpace={1.1} />
+		<!-- {#if !config.isHamburgerOpen}
+			<Spaceman particleSpace={1.1} />
+		{/if} -->
 	</div>
 	<div id="about" class="mb-20 flex flex-col gap-10">
 		<h1
@@ -77,7 +80,7 @@
 						class="flex w-full flex-1 flex-row items-center justify-between gap-2"
 						style="height:60px; max-height:60px; min-height:60px;"
 					>
-						<img src="/galactica-white.svg" class="h-10" />
+						<img src="/galactica-white.svg" class="h-6" />
 						<!-- <p class="text-white/05 hidden text-sm xl:block">Jun 2024 - present</p> -->
 					</div>
 					<p
@@ -144,8 +147,8 @@
 						style="height:60px; max-height:60px; min-height:60px;"
 					>
 						<div class="flex flex-row items-center justify-center gap-5">
-							<img src="/xborg.svg" class="h-10" />
-							<img src="/swissborg.svg" class="h-7" />
+							<img src="/xborg.svg" class="h-7" />
+							<img src="/swissborg.svg" class="h-6" />
 						</div>
 						<!-- <p class="text-white/05 text-sm">Oct 2024 - present</p> -->
 					</div>
@@ -195,7 +198,7 @@
 	</div>
 
 	<div
-		id="development"
+		id="dapps"
 		class="relative flex flex-1 flex-row items-start gap-10 overflow-hidden p-5 xl:p-10"
 		class:mt-20={$device.isDesktop}
 	>

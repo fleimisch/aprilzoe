@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { device } from '$lib/stores/device';
 	const { text = $bindable('APRIL ZOE') } = $props();
+	import { config } from '$lib/stores/appStates.svelte';
 
 	let ROWS = 0;
 	let COLS: number;
