@@ -2,6 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import { config } from '$lib/stores/appStates.svelte';
 	import ParticleIcon from '$lib/components/ParticleIcon.svelte';
+	import { device } from '$lib/stores/device';
 
 	const scrollTo = (id: string) => {
 		config.isHamburgerOpen = false;
@@ -38,48 +39,59 @@
 		transition:fade={{ duration: 300 }}
 		class="headerMenu fixed flex h-full w-full flex-col gap-3 p-10"
 	>
-		<div class="hamburgerItems flex flex-col gap-2 ps-20 pt-10">
+		<div class="flex flex-col gap-10" class:ps-20={$device.isDesktop}>
 			<div
-				class="w-full cursor-pointer bg-gradient-to-r from-white/90 to-white/100 bg-clip-text font-sans text-2xl font-extrabold uppercase text-transparent"
+				class="flex w-full cursor-pointer flex-row items-center gap-3 bg-gradient-to-r from-white/90 to-white/100 bg-clip-text pt-10 font-sans text-2xl font-extrabold uppercase text-transparent"
 			>
+				<img src="/aprilzoe.png" width={45} class="rounded-full" />
 				April Zoe
 			</div>
-			<span
-				on:click={() => scrollTo('about')}
-				on:keydown={(e) => e.key === 'Enter' && scrollTo('about')}
-				class="w-full cursor-pointer bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans font-extrabold uppercase text-transparent"
-				role="button"
-				tabindex="0"
-			>
-				About
-			</span>
-			<span
-				on:click={() => scrollTo('blog')}
-				on:keydown={(e) => e.key === 'Enter' && scrollTo('about')}
-				class="w-full cursor-pointer bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans font-extrabold uppercase text-transparent"
-				role="button"
-				tabindex="0"
-			>
-				Blog
-			</span>
-			<span
-				on:click={() => scrollTo('development')}
-				on:keydown={(e) => e.key === 'Enter' && scrollTo('development')}
-				class="w-full cursor-pointer bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text font-sans font-extrabold uppercase text-transparent"
-				role="button"
-				tabindex="0">dApps</span
-			>
-		</div>
-		<div class=" fixed bottom-10 flex flex-row ps-20" style="margin-left:-20px">
-			<ParticleIcon icon="x.svg" size={100} title="X" link="https://x.com/April_Zoe_AZ" />
-			<ParticleIcon icon="telegram.svg" size={100} title="Telegram" link="https://t.me/April_Zoe" />
-			<ParticleIcon icon="discord.svg" size={100} title="Discord" clipboard="@aprilzoe8728" />
-			<ParticleIcon
-				icon="phaver.svg"
-				size={100}
-				title="Phaver"
-				link="https://app.phaver.com/xi81E6kZNWToxyav5"
-			/>
+			<div class="hamburgerItems flex flex-col gap-3 pt-1">
+				<span
+					on:click={() => scrollTo('about')}
+					on:keydown={(e) => e.key === 'Enter' && scrollTo('about')}
+					class="w-full cursor-pointer font-sans font-extrabold uppercase text-transparent"
+					role="button"
+					tabindex="0"
+				>
+					About
+				</span>
+				<span
+					on:click={() => scrollTo('blog')}
+					on:keydown={(e) => e.key === 'Enter' && scrollTo('about')}
+					class="w-full cursor-pointer font-sans font-extrabold uppercase text-transparent"
+					role="button"
+					tabindex="0"
+				>
+					Blog
+				</span>
+				<span
+					on:click={() => scrollTo('development')}
+					on:keydown={(e) => e.key === 'Enter' && scrollTo('development')}
+					class="w-full cursor-pointer font-sans font-extrabold uppercase text-transparent"
+					role="button"
+					tabindex="0">dApps</span
+				>
+			</div>
+			<div class=" fixed bottom-10 flex flex-col">
+				<span class="font-sans font-bold uppercase text-white/50">Socials</span>
+				<div class="flex flex-row" style="margin-left:-20px">
+					<ParticleIcon icon="x.svg" size={100} title="X" link="https://x.com/April_Zoe_AZ" />
+					<ParticleIcon
+						icon="telegram.svg"
+						size={100}
+						title="Telegram"
+						link="https://t.me/April_Zoe"
+					/>
+					<ParticleIcon icon="discord.svg" size={100} title="Discord" clipboard="@aprilzoe8728" />
+					<ParticleIcon
+						icon="phaver.svg"
+						size={100}
+						title="Phaver"
+						link="https://app.phaver.com/xi81E6kZNWToxyav5"
+					/>
+				</div>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -96,9 +108,28 @@
 		z-index: 9;
 	}
 
+	.headerMenu:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 50%;
+		height: 80%;
+		background-image: linear-gradient(99deg, rgb(255, 35, 193), rgb(129, 47, 253));
+		border-radius: 1000px;
+		filter: blur(200px);
+		z-index: 0;
+		user-select: none !important;
+		pointer-events: none !important;
+		opacity: 0.22;
+	}
+
 	.hamburgerItems > span {
 		font-size: 4.5rem;
 		line-height: 1.1;
+		color: black;
+		text-shadow: 0px -1px 0px #ff6dc5;
+		transition: background-image 0.3s ease;
 	}
 
 	.hamburger {
@@ -193,5 +224,25 @@
 
 	.hamburger--minus.is-active .hamburger-inner::after {
 		bottom: 0;
+	}
+
+	@media (min-width: 1024px) {
+		.hamburgerItems > span:hover {
+			background-image: linear-gradient(99deg, rgb(255, 35, 193), rgb(129, 47, 253));
+			background-clip: text;
+			-webkit-background-clip: text;
+			color: transparent; /* Ensure text color is transparent */
+			-webkit-text-fill-color: transparent; /* Ensure text fill is transparent */
+			text-shadow: none; /* Remove text-shadow on hover */
+		}
+	}
+
+	@media (max-width: 1024px) {
+		.headerMenu:before {
+			width: 100%;
+			height: 80%;
+			opacity: 0.3;
+			left: -10%;
+		}
 	}
 </style>
